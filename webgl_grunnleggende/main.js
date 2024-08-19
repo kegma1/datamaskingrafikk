@@ -42,9 +42,9 @@ let initShaders = (gl) => {
  * */
 let initBuffers = (gl) => {
     const positions = new Float32Array([
-        0.7, 0.5, 0,    // X Y Z
-        -0.5, -0.9, 0,  // X Y Z
-        0.5, -0.5, 0,   // X Y Z
+        0.0, 0.5, 0.0,    // X Y Z
+        -0.5, 0.0, 0.0,  // X Y Z
+        0.5, 0.0, 0.0,   // X Y Z
     ]);
 
     const positionBuffer = gl.createBuffer();
@@ -81,7 +81,7 @@ let connectPossitionAttribute = (gl, shaderInfo, positionBuffer) => {
  * @param {Object} shaderInfo 
  */
 let connectColorUniform = (gl, shaderInfo) => {
-    let colorRGBA = [1.0, 1.0, 0.0, 1.0];
+    let colorRGBA = [1.0, 0.0, 0.0, 1.0];
     gl.uniform4f(shaderInfo.uniformLocations.fragmentColor, colorRGBA[0],colorRGBA[1],colorRGBA[2],colorRGBA[3]);
 }
 
