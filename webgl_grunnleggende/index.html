@@ -7,25 +7,27 @@
 </head>
 <body>
 
-    <canvas id="canvas" width="600px" height="800px"></canvas>
+    <canvas id="canvas" width="800px" height="600px"></canvas>
 
-    <script>
-        /** @type {HTMLCanvasElement|null} */
-        let canvas = document.getElementById("canvas");
-        let ctx = canvas.getContext("2d");
-
-        ctx.fillStyle = "rgb(74, 65, 42)";
-        let t = 0.0;
-        let main = async () => {
-            ctx.clearRect(0,0,600,800);
-            let y = Math.sin(t)*100;
-            let x = Math.cos(t)*100;
-            ctx.fillRect(300 + x, 300 + y, 100 + y, 100 + x)
-            t += 0.1;
-            requestAnimationFrame(main);
+    <script id="base-vertex-shader" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+        void main(void) {
+            gl_Position = vec4(aVertexPosition, 1.0);
         }
-        requestAnimationFrame(main)
     </script>
-    
+
+    <script id="base-fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        uniform lowp vec4 uFragColor;
+        void main(void) {
+           gl_FragColor = uFragColor;
+        }
+    </script>
+
+    <script type="module">
+        import {main} from "./main.js";
+        main();
+    </script>
+   
 </body>
 </html>
