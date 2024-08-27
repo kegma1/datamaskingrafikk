@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL grunnleggende</title>
+</head>
+<body>
+
+    <script id="base-vertex-shader" type="x-shader/x-vertex">
+        attribute vec3 aVertexColor;
+        varying lowp vec4 vColor;
+
+        attribute vec3 aVertexPosition;
+        void main(void) {
+            gl_Position = vec4(aVertexPosition, 1.0);
+            vColor = vec4(aVertexColor, 1.0);
+        }
+    </script>
+
+    <script id="base-fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying lowp vec4 vColor;
+        
+        void main(void) {
+           gl_FragColor =  vColor;
+        }
+    </script>
+
+    <script type="module">
+        import {main} from "./main.js";
+        main();
+    </script>
+   
+</body>
+</html>
