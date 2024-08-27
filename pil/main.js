@@ -25,7 +25,7 @@ function initaArrowBuffers(gl) {
 	const tail_depth = 0.1;
 
 
-
+	//test
 	const positions = new Float32Array([
 		arrow_width, 0, 0,
 		arrow_width/2, arrow_height, 0,
