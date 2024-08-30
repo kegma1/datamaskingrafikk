@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL grunnleggende</title>
+    
+    <script src="../webgl24_std/base/lib/cuon-matrix.js"></script>
+    <script src="../webgl24_std/base/lib/gl-matrix.js"></script>
+</head>
+<body>
+
+    <script id="base-vertex-shader" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+        uniform mat4 uModelViewMatrix;
+        uniform mat4 uProjectionMatrix;
+
+        void main(void) {
+            gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);
+        }
+    </script>
+
+    <script id="base-fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        //uniform vec4 uColor;
+        
+        void main(void) {
+           gl_FragColor =  vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    </script>
+
+    <script type="module">
+        import {main} from "./main.js";
+        main();
+    </script>
+   
+</body>
+</html>
