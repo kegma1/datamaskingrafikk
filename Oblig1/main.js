@@ -86,12 +86,12 @@ export function main() {
 
 	let p2 = new MeshInstance(pyramid, new ShaderInstance(basicShader))
 	p2.position = new Vector3([2, 0, 0])
-
+	
 	let mainLoop = (timeElapsed) => {
 		clearCanvas(gl);
-
-		p1.rotation.rotate(1, 0, 1, 0)
-		p2.rotation.rotate(-1, 0, 1, 0)
+		
+		p1.rotation.rotate(1, 0.5, 1, -0.5)
+		p2.rotation.rotate(-1, -0.5, 1, 0.5)
 
 		p1.position.elements[1] = Math.sin(timeElapsed / 3)
 		p2.position.elements[1] = -Math.sin(timeElapsed / 3)
