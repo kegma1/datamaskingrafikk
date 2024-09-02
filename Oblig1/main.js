@@ -87,12 +87,14 @@ export function main() {
 	let p2 = new MeshInstance(pyramid, new ShaderInstance(basicShader))
 	p2.position = new Vector3([2, 0, 0])
 
-	let mainLoop = () => {
+	let mainLoop = (timeElapsed) => {
 		clearCanvas(gl);
 
 		p1.rotation.rotate(1, 0, 1, 0)
 		p2.rotation.rotate(-1, 0, 1, 0)
 
+		p1.position.elements[1] = Math.sin(timeElapsed / 3)
+		p2.position.elements[1] = -Math.sin(timeElapsed / 3)
 
 
 		p1.bind(camera, {
@@ -104,9 +106,9 @@ export function main() {
 			fragmentColor: new Vector4([0, 0, 1, 1])
 		});
 		p2.draw();
-		requestAnimationFrame(mainLoop);
+		requestAnimationFrame(() => mainLoop(timeElapsed + 0.1));
 	}
-	requestAnimationFrame(mainLoop)
+	requestAnimationFrame(() => mainLoop(0))
 }
 
 
