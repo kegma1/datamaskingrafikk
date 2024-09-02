@@ -34,7 +34,7 @@
         uniform vec4 uFragColor;
         
         void main(void) {
-           gl_FragColor =  vColor;
+           gl_FragColor =  uFragColor + vColor;
         }
     </script>
 

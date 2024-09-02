@@ -1,13 +1,98 @@
-import {WebGLShader} from '../webgl24_std/base/helpers/WebGLShader.js';
-
 export class MeshInstance {
-    constructor(mesh, shaderInstance, shaderParams) {
+    /**
+     * 
+     * @param {Mesh} mesh 
+     * @param {ShaderInstance} shaderInstance 
+     * @param {Object} shaderParams 
+     */
+    constructor(mesh, shaderInstance) {
         this.mesh = mesh;
         this.shader = shaderInstance;
 
-        this.position = new Vector3()
-        this.rotation = new Vector3()
-        this.scale = new Vector3()
+        this.position = new Vector3([0, 0, 0])
+        this.rotation = new Matrix4()
+        this.scale = new Vector3([1, 1, 1])
+    }
+
+    
+
+    bind(camera, constants) {
+        const transformation = new Matrix4();
+        transformation.translate(this.position.elements[0], this.position.elements[1], this.position.elements[2]);
+        transformation.multiply(this.rotation)
+        transformation.scale(this.scale.elements[0], this.scale.elements[1], this.scale.elements[2]);
+
+        let modelMatrix = new Matrix4();
+	    modelMatrix.setIdentity();
+        modelMatrix.multiply(transformation);
+        
+
+	    let modelViewMatrix = new Matrix4(new Matrix4(camera.viewMatrix).multiply(modelMatrix));
+
+	    this.shader.set("projectionMatrix", camera.projectionMatrix);
+        this.shader.set("modelViewMatrix", modelViewMatrix);
+
+        this.shader.bind(constants);
+        this.mesh.bind(this.shader);
+    }
+
+    draw() {
+        this.mesh.draw()
+    }
+}
+
+export class ShaderInstance {
+    /**
+     * 
+     * @param {Shader} shader 
+     */
+    constructor(shader) {
+        this.shaderData = shader;
+        this.uniforms = {};
+        for (let k in shader.uniforms) {
+            this.uniforms[k] = {
+                ...shader.uniforms[k],
+                value: null,
+            }
+        }
+
+        this.attributs = {...shader.attributs};
+    }
+
+    set(name, v) {
+        this.uniforms[name].value = v;
+    }
+
+    bind(constants) {
+        this.shaderData.bind();
+        const gl = this.shaderData.gl;
+
+        for (let k in this.uniforms) {
+            const u = this.uniforms[k];
+
+            let value = constants[k];
+            if (u.value) {
+                value = u.value;
+            }
+
+            if (value && u.location) {
+                const t = u.type;
+                
+                if (t == "Matrix4") {
+                    gl.uniformMatrix4fv(u.location, false, value.elements);
+                } else if (t == "Matrix3") {
+                    gl.uniformMatrix3fv(u.location, false, value.elements);
+                } else if (t == "Vector4") {
+                    gl.uniform4fv(u.location, value.elements);
+                } else if (t == "Vector3") {
+                    gl.uniform3fv(u.location, value.elements);
+                } else if (t == "Vector2") {
+                    gl.uniform2fv(u.location, value.elements);
+                } 
+
+            }
+        }
+
     }
 }
 
@@ -45,26 +130,10 @@ export class Mesh {
     /**
      * 
      * @param {Shader} shader 
-     * @param {BasicCamera} camera 
-     * @param {Matrix4} transformation 
      */
-    bind(shader, camera, transformation = null) {
-        shader.bind();
-
-        connectAttribute(this.gl, shader.attribLocations.vertexPosition, this.buffers.positions.buffer);
-        connectAttribute(this.gl, shader.attribLocations.vertexColor, this.buffers.colors.buffer);
-
-        let modelMatrix = new Matrix4();
-	    modelMatrix.setIdentity();
-        if (transformation != null) {
-            modelMatrix.multiply(transformation)
-        }
-
-	    let modelViewMatrix = new Matrix4(new Matrix4(camera.viewMatrix).multiply(modelMatrix));
-
-	    this.gl.uniformMatrix4fv(shader.uniformLocations.modelViewMatrix, false, modelViewMatrix.elements);
-	    this.gl.uniformMatrix4fv(shader.uniformLocations.projectionMatrix, false, camera.projectionMatrix.elements);
-
+    bind(shader) {
+        connectAttribute(this.gl, shader.attributs.vertexPosition.location, this.buffers.positions.buffer);
+        connectAttribute(this.gl, shader.attributs.vertexColor.location, this.buffers.colors.buffer, 4);
     }
 
     draw() {
@@ -73,7 +142,7 @@ export class Mesh {
 }
 
 export class Shader {
-    constructor(gl, vertexSource, fragmentSource, shaderParams) {
+    constructor(gl, vertexSource, fragmentSource, attribueParams, uniformParams) {
         /**@type {WebGL2RenderingContext} */
         this.gl = gl;
         this.vertexSource = vertexSource;
@@ -90,15 +159,23 @@ export class Shader {
 			alert('Feil ved kompilering og/eller linking av shaderprogrammene: ' + gl.getProgramInfoLog(this.shaderProgram));
 		}
 
-        this.attribLocations = {};
-		this.uniformLocations = {};
+        this.attributs = {};
+		this.uniforms = {};
 
-        for(let param of shaderParams) {
-            if (param.type == "attribute") {
-                this.attribLocations[param.fieldName] = this.gl.getAttribLocation(this.shaderProgram, param.paramName);
-            } else {
-                this.uniformLocations[param.fieldName] = this.gl.getUniformLocation(this.shaderProgram, param.paramName);
-            }
+        for(let k in attribueParams) {
+
+            this.attributs[k] = {
+                location: this.gl.getAttribLocation(this.shaderProgram, attribueParams[k].name),
+                // type: attrib.type,
+            };
+
+        }
+
+        for(let k in uniformParams) {
+            this.uniforms[k] = {
+                location: this.gl.getUniformLocation(this.shaderProgram, uniformParams[k].name),
+                type: uniformParams[k].type,
+            };
         }
     }
 
