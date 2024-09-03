@@ -3,16 +3,16 @@ export class Scene {
         this.gl = gl;
         this.camera = camera;
         this.objects = objects;
-        
+
         /**@type {function(Object): void} [setup] - Callback function that takes Objects as parameters. */
         this.setup = () => {};
-        /**@type {function(Object, number, number): void} [update] - Callback function that takes Objects, timeElapsed, and deltaTime as parameters. */
+        /**@type {function(Camera, Object, number, number): void} [update] - Callback function that takes Camere, Objects, timeElapsed, and deltaTime as parameters. */
         this.update = () => {};
     }
 
     draw() {
         clearCanvas(this.gl);
-
+        
         for (const k in this.objects) {
             this.objects[k].bind(this.camera);
             this.objects[k].draw();
@@ -26,7 +26,7 @@ export class Scene {
             const deltaTime = timestamp - (this.lastFrameTime || timestamp);
             this.lastFrameTime = timestamp;
 
-            this.update(this.objects, timeElapsed / 1000, deltaTime / 1000);
+            this.update(this.camera, this.objects, timeElapsed / 1000, deltaTime / 1000);
 
             this.draw();
             requestAnimationFrame(renderLoop);
@@ -133,10 +133,16 @@ export class ShaderInstance {
 }
 
 export class Mesh {
-    constructor(gl, vertexData, vertexLength) {
+    constructor(gl, vertexData, vertexLength, mode = null) {
         /**@type {WebGL2RenderingContext} */
         this.gl = gl;
         this.buffers = {};
+
+        if (!mode) {
+            this.mode = gl.TRIANGLES
+        } else {
+            this.mode = mode
+        }
 
         this.vertexData = vertexData;
         this.vertexLength = vertexLength;
@@ -180,7 +186,7 @@ export class Mesh {
     }
 
     draw() {
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, this.count);
+        this.gl.drawArrays(this.mode, 0, this.count);
     }
 }
 
@@ -249,9 +255,9 @@ export class Camera {
      */
     constructor(pos, lookAt, FOV, aspectRatio, near, far) {
         /**@type {vec3} */
-        this.cam_pos = pos;
+        this.pos = pos;
         /**@type {vec3} */
-        this.look = lookAt;
+        this.lookAt = lookAt;
         /**@type {vec3} */
         this.up = vec3.fromValues(0, 1, 0);
 
@@ -275,20 +281,8 @@ export class Camera {
         this.update_view();
     }
 
-    get pos() { return this.cam_pos; }
-    set pos(new_pos) {
-        this.cam_pos = new_pos;
-        this.update_view();
-    }
-
-    get lookAt() { return this.look; }
-    set lookAt(new_lookAt) {
-        this.look = new_lookAt;
-        this.update_view();
-    }
-
     update_view() {
-        mat4.lookAt(this.viewMatrix, this.cam_pos, this.look, this.up);
+        mat4.lookAt(this.viewMatrix, this.pos, this.lookAt, this.up);
         mat4.perspective(this.projectionMatrix, this.FOV, this.aspectRatio, this.near, this.far);
     }
 }
