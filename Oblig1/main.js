@@ -1,4 +1,4 @@
-import {WebGLCanvas, Camera, Mesh, Shader, MeshInstance, ShaderInstance, Scene} from "./Oblig1/helpers.js";
+//import {WebGLCanvas, Camera, Mesh, Shader, MeshInstance, ShaderInstance, Scene} from "./Oblig1/helpers.js";
 
 // Initialize an object to store the state of keys
 const keys = {};
