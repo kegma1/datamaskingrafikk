@@ -97,25 +97,24 @@ export class ShaderInstance {
 }
 
 export class Mesh {
-    constructor(gl, positions, colors) {
+    constructor(gl, vertexData, vertexLength) {
         /**@type {WebGL2RenderingContext} */
         this.gl = gl
         this.buffers = {}
 
 
-        this.positions = positions
+        this.vertexData = vertexData
+        this.vertexLength = vertexLength
 
-        this.colors = colors
-
-        this.bufferData({size: 3, data: positions}, "positions");
-        this.bufferData({size: 3, data: colors}, "colors");
+        this.bufferData({data: vertexData}, "vertexData");
+        // this.bufferData({data: colors}, "colors");
     }
 
     /**
      * @returns
      */
     get count() {
-        return this.positions.length / 3;
+        return this.vertexData.length / this.vertexLength;
     }
 
     bufferData(info, name) {
@@ -132,8 +131,27 @@ export class Mesh {
      * @param {Shader} shader 
      */
     bind(shader) {
-        connectAttribute(this.gl, shader.attributs.vertexPosition.location, this.buffers.positions.buffer);
-        connectAttribute(this.gl, shader.attributs.vertexColor.location, this.buffers.colors.buffer, 4);
+        for (let k in shader.attributs) {
+            connectAttribute(
+                this.gl, 
+                shader.attributs[k].location, 
+                this.buffers.vertexData.buffer, 
+                shader.attributs[k].size,
+                shader.attributs[k].type,
+                shader.attributs[k].normalize,
+                shader.attributs[k].stride,
+                shader.attributs[k].offset 
+            );
+        }
+        // connectAttribute(
+        //     this.gl, 
+        //     shader.attributs.vertexPosition.location, 
+        //     this.buffers.vertexData.buffer, 
+        //     shader.attributs.vertexPosition.size,
+            
+        //     shader.attributs.vertexPosition.stride,
+        //     shader.attributs.vertexPosition.offset);
+        // connectAttribute(this.gl, shader.attributs.vertexColor.location, this.buffers.vertexData.buffer, 4);
     }
 
     draw() {
@@ -163,12 +181,10 @@ export class Shader {
 		this.uniforms = {};
 
         for(let k in attribueParams) {
-
             this.attributs[k] = {
                 location: this.gl.getAttribLocation(this.shaderProgram, attribueParams[k].name),
-                // type: attrib.type,
+                ...attribueParams[k],
             };
-
         }
 
         for(let k in uniformParams) {

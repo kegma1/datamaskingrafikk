@@ -13,58 +13,35 @@ export function main() {
 	let gl = webGLCanvas.gl;
 
 	let pyramid = new Mesh(gl, [
-		0, 1, 0,
-		-1, 0, 1,
-		1, 0, 1,
+		0, 1, 0,	 0.25, 0.25, 0.25, 1, // X Y Z	R G B A
+		-1, 0, 1,	 0.25, 0.25, 0.25, 1, // X Y Z	R G B A
+		1, 0, 1,	 0.25, 0.25, 0.25, 1, // X Y Z	R G B A
 
-		0, 1, 0,
-		1, 0, 1,
-		1, 0 , -1,
+		0, 1, 0,	 0.25, 0.25, 0.25, 1, // X Y Z	R G B A
+		1, 0, 1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
+		1, 0 , -1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
 
-		0, 1, 0,
-		-1, 0, -1,
-		-1, 0 , 1,
+		0, 1, 0,	 0.25, 0.25, 0.25, 1, // X Y Z	R G B A
+		-1, 0, -1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
+		-1, 0 , 1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
 
-		0, 1, 0,
-		-1, 0, -1,
-		1, 0, -1,
+		0, 1, 0,	 0.25, 0.25, 0.25, 1, // X Y Z	R G B A
+		-1, 0, -1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
+		1, 0, -1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
 
-		1, 0, 1,
-		1, 0, -1,
-		-1, 0, -1,
+		1, 0, 1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
+		1, 0, -1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
+		-1, 0, -1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
 
-		-1, 0, -1,
-		-1, 0, 1,
-		1, 0, 1,
-	],[
-		0.25, 0.25, 0.25, 1,
-		-0.5, -0.5, -0.5, 1,
-		-0.5, -0.5, -0.5, 1,
+		-1, 0, -1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
+		-1, 0, 1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
+		1, 0, 1,	 -0.5, -0.5, -0.5, 1, // X Y Z	R G B A
+	], 3 + 4)
 
-		0.25, 0.25, 0.25, 1,
-		-0.5, -0.5, -0.5, 1,
-		-0.5, -0.5, -0.5, 1,
-
-		0.25, 0.25, 0.25, 1,
-		-0.5, -0.5, -0.5, 1,
-		-0.5, -0.5, -0.5, 1,
-
-		0.25, 0.25, 0.25, 1,
-		-0.5, -0.5, -0.5, 1,
-		-0.5, -0.5, -0.5, 1,
-
-		-0.5, -0.5, -0.5, 1,
-		-0.5, -0.5, -0.5, 1,
-		-0.5, -0.5, -0.5, 1,
-
-		-0.5, -0.5, -0.5, 1,
-		-0.5, -0.5, -0.5, 1,
-		-0.5, -0.5, -0.5, 1,
-	])
-
+	let stride = (3 + 4) * Float32Array.BYTES_PER_ELEMENT
 	const basicShader = new Shader(gl, vertexShaderSource, fragmentShaderSource, {
-		vertexPosition: {name: "aVertexPosition"},
-		vertexColor: {name: "aVertexColor"},
+		vertexPosition: {name: "aVertexPosition", size: 3, stride: stride, offset: 0},
+		vertexColor: {name: "aVertexColor", size: 4, stride: stride, offset: 3 * Float32Array.BYTES_PER_ELEMENT},
 	}, {
 		fragmentColor: {name: "uFragColor", type: "Vector4"},
 		projectionMatrix: {name: "uProjectionMatrix", type: "Matrix4"},
