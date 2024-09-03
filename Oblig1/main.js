@@ -1,5 +1,4 @@
-import {WebGLCanvas} from '../webgl24_std/base/helpers/WebGLCanvas.js';
-import {Camera, Mesh, Shader, MeshInstance, ShaderInstance, Scene} from "./helpers.js";
+import {WebGLCanvas, Camera, Mesh, Shader, MeshInstance, ShaderInstance, Scene} from "./helpers.js";
 
 
 export function main() {
