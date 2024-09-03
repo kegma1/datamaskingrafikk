@@ -1,6 +1,6 @@
 import {WebGLCanvas} from '../webgl24_std/base/helpers/WebGLCanvas.js';
 import {WebGLShader} from '../webgl24_std/base/helpers/WebGLShader.js';
-import {clearCanvas, BasicCamera, Mesh, Shader, MeshInstance, ShaderInstance} from "./helpers.js"
+import {Camera, Mesh, Shader, MeshInstance, ShaderInstance, Scene} from "./helpers.js"
 
 
 export function main() {
@@ -48,7 +48,7 @@ export function main() {
 		modelViewMatrix: {name: "uModelViewMatrix", type: "Matrix4"},
 	})
 
-	let camera = new BasicCamera(
+	let camera = new Camera(
 		new Vector3([0, 3, 10]), 
 		new Vector3([0, 0, 0]),
 		45,
@@ -57,35 +57,27 @@ export function main() {
 		1000.0,
 	);
 
-	let p1 = new MeshInstance(pyramid, new ShaderInstance(basicShader))
-	p1.position = new Vector3([-2, 0, 0])
+	let mainScene = new Scene(gl, camera, {
+		p1: new MeshInstance(pyramid, new ShaderInstance(basicShader), {fragmentColor: new Vector4([1, 0, 0, 1])}),
+		p2: new MeshInstance(pyramid, new ShaderInstance(basicShader), {fragmentColor: new Vector4([0, 0, 1, 1])}),
+	})
 
-
-	let p2 = new MeshInstance(pyramid, new ShaderInstance(basicShader))
-	p2.position = new Vector3([2, 0, 0])
-	
-	let mainLoop = (timeElapsed) => {
-		clearCanvas(gl);
-		
-		p1.rotation.rotate(1, 0.5, 1, -0.5)
-		p2.rotation.rotate(-1, -0.5, 1, 0.5)
-
-		p1.position.elements[1] = Math.sin(timeElapsed / 3)
-		p2.position.elements[1] = -Math.sin(timeElapsed / 3)
-
-
-		p1.bind(camera, {
-			fragmentColor: new Vector4([1, 0, 0, 1])
-		});
-		p1.draw();
-
-		p2.bind(camera, {
-			fragmentColor: new Vector4([0, 0, 1, 1])
-		});
-		p2.draw();
-		requestAnimationFrame(() => mainLoop(timeElapsed + 0.1));
+	mainScene.setup = (o) => {
+		o.p1.position = new Vector3([-2, 0, 0])
+		o.p2.position = new Vector3([2, 0, 0])
 	}
-	requestAnimationFrame(() => mainLoop(0))
+
+	mainScene.update = (o, time, dt) => {
+		o.p1.rotation.rotate(1, 0.5, 1, -0.5)
+		o.p2.rotation.rotate(-1, -0.5, 1, 0.5)
+
+		o.p1.position.elements[1] = Math.sin(time * 3)
+		o.p2.position.elements[1] = -Math.sin(time * 3)
+
+		o.p1.shaderParams.fragmentColor.elements[1] = Math.sin(time * 4) * 2
+	}
+
+	mainScene.start();
 }
 
 

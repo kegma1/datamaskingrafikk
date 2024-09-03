@@ -1,3 +1,45 @@
+export class Scene {
+    constructor(gl, camara, objects = {}) {
+        this.gl = gl;
+        this.camera = camara;
+        this.objects = objects
+        
+        /**@type {function(Object): void} [setup] - Callback function that takes Objects as parameters. */
+        this.setup = () => {};
+        /**@type {function(Object,number, number): void} [update] - Callback function that takes Objects, timeElapsed and deltaTime as parameters. */
+        this.update = () => {};
+    }
+
+    draw() {
+        clearCanvas(this.gl);
+        
+
+        for (const k in this.objects) {
+            this.objects[k].bind(this.camera);
+            this.objects[k].draw();
+        }
+    }
+
+    start() {
+        const renderLoop = (timestamp) => {
+            const timeElapsed = (this.startTime !== undefined) ? timestamp - this.startTime : 0;
+            this.startTime = this.startTime || timestamp;
+            const deltaTime = timestamp - (this.lastFrameTime || timestamp);
+            this.lastFrameTime = timestamp;
+
+
+            this.update(this.objects, timeElapsed / 1000, deltaTime / 1000);
+
+            this.draw();
+            requestAnimationFrame(renderLoop)
+        }
+
+        this.setup(this.objects)
+        requestAnimationFrame(renderLoop)
+    }
+}
+
+
 export class MeshInstance {
     /**
      * 
@@ -5,9 +47,10 @@ export class MeshInstance {
      * @param {ShaderInstance} shaderInstance 
      * @param {Object} shaderParams 
      */
-    constructor(mesh, shaderInstance) {
+    constructor(mesh, shaderInstance, shaderParams) {
         this.mesh = mesh;
         this.shader = shaderInstance;
+        this.shaderParams = shaderParams
 
         this.position = new Vector3([0, 0, 0])
         this.rotation = new Matrix4()
@@ -16,7 +59,9 @@ export class MeshInstance {
 
     
 
-    bind(camera, constants) {
+    bind(camera) {
+        const constants = this.shaderParams;
+
         const transformation = new Matrix4();
         transformation.translate(this.position.elements[0], this.position.elements[1], this.position.elements[2]);
         transformation.multiply(this.rotation)
@@ -212,7 +257,7 @@ export class Shader {
     }
 }
 
-export class BasicCamera {
+export class Camera {
     /**
      * 
      * @param {Vector3} pos 
