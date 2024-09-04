@@ -14,8 +14,8 @@ export class Scene {
         clearCanvas(this.gl);
         
         for (const k in this.objects) {
-            this.objects[k].bind(this.camera);
-            this.objects[k].draw();
+            // this.objects[k].bind(this.camera);
+            this.objects[k].draw(this.camera);
         }
     }
 
@@ -47,7 +47,7 @@ export class MeshInstance {
     constructor(mesh, shaderInstance, shaderParams) {
         this.mesh = mesh;
         this.shader = shaderInstance;
-        this.shaderParams = shaderParams;
+        this.shaderParams = shaderParams || {};
 
         this.position = vec3.create();
         this.rotation = mat4.create();
@@ -76,7 +76,8 @@ export class MeshInstance {
         this.mesh.bind(this.shader);
     }
 
-    draw() {
+    draw(camera) {
+        this.bind(camera);
         this.mesh.draw();
     }
 }
