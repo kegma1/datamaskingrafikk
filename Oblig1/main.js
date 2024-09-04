@@ -1,4 +1,5 @@
 import {WebGLCanvas, Camera, Mesh, Shader, MeshInstance, ShaderInstance, Scene} from "./helpers.js";
+import { vec3, vec4, mat4 } from "../gl-matrix.js";
 
 // Initialize an object to store the state of keys
 const keys = {};
