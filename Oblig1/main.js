@@ -12,108 +12,218 @@ const gl = webGLCanvas.gl;
 // Initialize an object to store the state of keys
 const keys = {};
 
+const roofHeight = 1;
+
 const models = {
     houseBody: new Mesh(gl, [
         // Top
-        1, 1, -1,   -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        1, 1, 1,   -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        -1, 1, 1,   -0.5, -0.5, -0.5, 1, // X Y Z R G B A
+        1, 1, -1,   // X Y Z
+        1, 1, 1,   // X Y Z
+        -1, 1, 1,   // X Y Z
 
-        -1, 1, 1,   -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        -1, 1, -1,   -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        1, 1, -1,   -0.5, -0.5, -0.5, 1, // X Y Z R G B A
+        -1, 1, 1,   // X Y Z
+        -1, 1, -1,   // X Y Z
+        1, 1, -1,   // X Y Z
 
-        // Bottom
-        1, -1, -1,    0, 0, 0, 1, // X Y Z R G B A
-        1, -1, 1,    0, 0, 0, 1, // X Y Z R G B A
-        -1, -1, 1,    0, 0, 0, 1, // X Y Z R G B A
+        // Front
+        1, 1, -1,     // X Y Z
+        1, 1, 1,      // X Y Z
+        1, -1, 1,     // X Y Z
 
-        -1, -1, 1,    0, 0, 0, 1, // X Y Z R G B A
-        -1, -1, -1,    0, 0, 0, 1, // X Y Z R G B A
-        1, -1, -1,    0, 0, 0, 1, // X Y Z R G B A
+        1, 1, -1,     // X Y Z
+        1, -1, -1,    // X Y Z
+        1, -1, 1,     // X Y Z
 
-        // // Front
-        1, 1, -1,     -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        1, 1, 1,      -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        1, -1, 1,     0, 0, 0, 1, // X Y Z R G B A
+        // Back
+        -1, 1, -1,    // X Y Z
+        -1, 1, 1,     // X Y Z
+        -1, -1, 1,    // X Y Z
 
-        1, 1, -1,     -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        1, -1, -1,    0, 0, 0, 1, // X Y Z R G B A
-        1, -1, 1,     0, 0, 0, 1, // X Y Z R G B A
+        -1, 1, -1,    // X Y Z
+        -1, -1, -1,   // X Y Z
+        -1, -1, 1,    // X Y Z
 
-        // // Back
-        -1, 1, -1,    -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        -1, 1, 1,     -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        -1, -1, 1,    0, 0, 0, 1, // X Y Z R G B A
+        // Left
+        1, 1, 1,      // X Y Z
+        -1, 1, 1,     // X Y Z
+        1, -1, 1,     // X Y Z
 
-        -1, 1, -1,    -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        -1, -1, -1,   0, 0, 0, 1, // X Y Z R G B A
-        -1, -1, 1,    0, 0, 0, 1, // X Y Z R G B A
+        -1, -1, 1,    // X Y Z
+        -1, 1, 1,     // X Y Z
+        1, -1, 1,     // X Y Z
 
-        // // Left
-        1, 1, 1,      -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        -1, 1, 1,     -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        1, -1, 1,     0, 0, 0, 1, // X Y Z R G B A
+        // Right
+        1, 1, -1,     // X Y Z
+        -1, 1, -1,    // X Y Z
+        1, -1, -1,    // X Y Z
 
-        -1, -1, 1,    0, 0, 0, 1, // X Y Z R G B A
-        -1, 1, 1,     -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        1, -1, 1,     0, 0, 0, 1, // X Y Z R G B A
-
-        // // Right
-        1, 1, -1,     -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        -1, 1, -1,    -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        1, -1, -1,    0, 0, 0, 1, // X Y Z R G B A
-
-        -1, -1, -1,   0, 0, 0, 1, // X Y Z R G B A
-        -1, 1, -1,    -0.5, -0.5, -0.5, 1, // X Y Z R G B A
-        1, -1, -1,    0, 0, 0, 1, // X Y Z R G B A
-    ], 3 + 4),
-    houseRoof: new Mesh(gl, [
+        -1, -1, -1,   // X Y Z
+        -1, 1, -1,    // X Y Z
+        1, -1, -1,    // X Y Z
+    ], 3),
+    aFrameRoof: new Mesh(gl, [
         // front
-        1.3, 0, 1.3,     0, 0, 0, 1, // X Y Z R G B A
-        0, 0.5, 1.3,       0, 0, 0, 1, // X Y Z R G B A
-        -1.3, 0, 1.3,    0, 0, 0, 1, // X Y Z R G B A
+        1.3, 0, 1.3,     // X Y Z
+        0, roofHeight, 1.3,       // X Y Z
+        -1.3, 0, 1.3,    // X Y Z
 
         // back
-        1.3, 0, -1.3,    0, 0, 0, 1, // X Y Z R G B A
-        0, 0.5, -1.3,      0, 0, 0, 1, // X Y Z R G B A
-        -1.3, 0, -1.3,   0, 0, 0, 1, // X Y Z R G B A
+        1.3, 0, -1.3,    // X Y Z
+        0, roofHeight, -1.3,      // X Y Z
+        -1.3, 0, -1.3,   // X Y Z
 
         // side 1
-        0, 0.5, 1.3,       0, 0, 0, 1, // X Y Z R G B A
-        1.3, 0, 1.3,     0, 0, 0, 1, // X Y Z R G B A
-        1.3, 0, -1.3,    0, 0, 0, 1, // X Y Z R G B A
+        0, roofHeight, 1.3,       // X Y Z
+        1.3, 0, 1.3,     // X Y Z
+        1.3, 0, -1.3,    // X Y Z
 
-        0, 0.5, 1.3,       0, 0, 0, 1, // X Y Z R G B A
-        0, 0.5, -1.3,      0, 0, 0, 1, // X Y Z R G B A
-        1.3, 0, -1.3,    0, 0, 0, 1, // X Y Z R G B A
+        0, roofHeight, 1.3,       // X Y Z
+        0, roofHeight, -1.3,      // X Y Z
+        1.3, 0, -1.3,    // X Y Z
 
         // side 2
-        0, 0.5, -1.3,      0, 0, 0, 1, // X Y Z R G B A
-        -1.3, 0, -1.3,   0, 0, 0, 1, // X Y Z R G B A
-        -1.3, 0, 1.3,    0, 0, 0, 1, // X Y Z R G B A
+        0, roofHeight, -1.3,      // X Y Z
+        -1.3, 0, -1.3,   // X Y Z
+        -1.3, 0, 1.3,    // X Y Z
 
-        0, 0.5, -1.3,      0, 0, 0, 1, // X Y Z R G B A
-        0, 0.5, 1.3,       0, 0, 0, 1, // X Y Z R G B A
-        -1.3, 0, 1.3,    0, 0, 0, 1, // X Y Z R G B A
+        0, roofHeight, -1.3,      // X Y Z
+        0, roofHeight, 1.3,       // X Y Z
+        -1.3, 0, 1.3,    // X Y Z
 
-    ], 3 + 4),
-    coord: new Mesh(gl, [
-		1, 0, 0,	1, 0, 0, 1, // X Y Z R G B A
-		-1, 0, 0,	1, 0, 0, 1, // X Y Z R G B A
+    ], 3),
+    flatRoof: new Mesh(gl, [
+        // Top
+        1.3, roofHeight, -1.3,      // X Y Z
+        1.3, roofHeight, 1.3,       // X Y Z
+        -1.3, roofHeight, 1.3,      // X Y Z
 
-		0, 1, 0,	0, 1, 0, 1, // X Y Z R G B A
-		0, -1, 0,	0, 1, 0, 1, // X Y Z R G B A
-		
-		0, 0, 1,	0, 0, 1, 1, // X Y Z R G B A
-		0, 0, -1,	0, 0, 1, 1, // X Y Z R G B A
-	], 3 + 4, gl.LINES),
+        -1.3, roofHeight, 1.3,      // X Y Z
+        -1.3, roofHeight, -1.3,     // X Y Z
+        1.3, roofHeight, -1.3,      // X Y Z
+
+        // Bottom
+        1.3, 0, -1.3,     // X Y Z
+        1.3, 0, 1.3,      // X Y Z
+        -1.3, 0, 1.3,     // X Y Z
+
+        -1.3, 0, 1.3,     // X Y Z
+        -1.3, 0, -1.3,    // X Y Z
+        1.3, 0, -1.3,     // X Y Z
+
+        // Front
+        1.3, roofHeight, -1.3,      // X Y Z
+        1.3, roofHeight, 1.3,       // X Y Z
+        1.3, 0, 1.3,      // X Y Z
+
+        1.3, roofHeight, -1.3,      // X Y Z
+        1.3, 0, -1.3,     // X Y Z
+        1.3, 0, 1.3,      // X Y Z
+
+        // Back
+        -1.3, roofHeight, -1.3,     // X Y Z
+        -1.3, roofHeight, 1.3,      // X Y Z
+        -1.3, 0, 1.3,     // X Y Z
+
+        -1.3, roofHeight, -1.3,     // X Y Z
+        -1.3, 0, -1.3,    // X Y Z
+        -1.3, 0, 1.3,     // X Y Z
+
+        // Left
+        1.3, roofHeight, 1.3,       // X Y Z
+        -1.3, roofHeight, 1.3,      // X Y Z
+        1.3, 0, 1.3,      // X Y Z
+
+        -1.3, 0, 1.3,     // X Y Z
+        -1.3, roofHeight, 1.3,      // X Y Z
+        1.3, 0, 1.3,      // X Y Z
+
+        // Right
+        1.3, roofHeight, -1.3,      // X Y Z
+        -1.3, roofHeight, -1.3,     // X Y Z
+        1.3, 0, -1.3,     // X Y Z
+
+        -1.3, 0, -1.3,    // X Y Z
+        -1.3, roofHeight, -1.3,     // X Y Z
+        1.3, 0, -1.3,     // X Y Z
+
+    ], 3),
+    pyramidRoof: new Mesh(gl, [
+        // Bottom
+        1.3, 0, -1.3,     // X Y Z
+        1.3, 0, 1.3,      // X Y Z
+        -1.3, 0, 1.3,     // X Y Z
+
+        -1.3, 0, 1.3,     // X Y Z
+        -1.3, 0, -1.3,    // X Y Z
+        1.3, 0, -1.3,     // X Y Z
+
+        // Front
+        0, roofHeight, 0,      // X Y Z
+        1.3, 0, 1.3,       // X Y Z
+        -1.3, 0, 1.3,      // X Y Z
+
+        // Back
+        0, roofHeight, 0,     // X Y Z
+        1.3, 0, -1.3,      // X Y Z
+        -1.3, 0, -1.3,     // X Y Z
+
+        // Left
+        0, roofHeight, 0,       // X Y Z
+        -1.3, 0, 1.3,      // X Y Z
+        -1.3, 0, -1.3,      // X Y Z
+
+        // Right
+        0, roofHeight, 0,      // X Y Z
+        1.3, 0, 1.3,     // X Y Z
+        1.3, 0, -1.3,     // X Y Z
+
+
+
+    ], 3),
+    coneRoof: new Mesh(gl, [
+        // Bottom
+        1.3, 0, -1.3,     // X Y Z
+        1.3, 0, 1.3,      // X Y Z
+        -1.3, 0, 1.3,     // X Y Z
+
+        -1.3, 0, 1.3,     // X Y Z
+        -1.3, 0, -1.3,    // X Y Z
+        1.3, 0, -1.3,     // X Y Z
+
+        // Front
+        0, roofHeight, 0,      // X Y Z
+        1.3, 0, 1.3,       // X Y Z
+        -1.3, 0, 1.3,      // X Y Z
+
+        // Back
+        0, roofHeight, 0,     // X Y Z
+        1.3, 0, -1.3,      // X Y Z
+        -1.3, 0, -1.3,     // X Y Z
+
+        // Left
+        0, roofHeight, 0,       // X Y Z
+        -1.3, 0, 1.3,      // X Y Z
+        -1.3, 0, -1.3,      // X Y Z
+
+        // Right
+        0, roofHeight, 0,      // X Y Z
+        1.3, 0, 1.3,     // X Y Z
+        1.3, 0, -1.3,     // X Y Z
+    ], 3),
+    ground: new Mesh(gl, [
+        50, 0, 50,   // X Y Z
+        -50, 0, 50,   // X Y Z
+        50, 0, -50,   // X Y Z
+        
+        50, 0, -50,   // X Y Z
+        -50, 0, -50,   // X Y Z
+        -50, 0, 50,   // X Y Z
+    ], 3),
 }
 
 const shaders = {
     basic: new Shader(gl, vertexShaderSource, fragmentShaderSource, {
-        vertexPosition: {name: "aVertexPosition", size: 3, stride: (3 + 4) * Float32Array.BYTES_PER_ELEMENT, offset: 0},
-        vertexColor: {name: "aVertexColor", size: 4, stride: (3 + 4) * Float32Array.BYTES_PER_ELEMENT, offset: 3 * Float32Array.BYTES_PER_ELEMENT},
+        vertexPosition: {name: "aVertexPosition", size: 3, stride: 3 * Float32Array.BYTES_PER_ELEMENT, offset: 0},
     }, {
         fragmentColor: {name: "uFragColor", type: "vec4"},
         projectionMatrix: {name: "uProjectionMatrix", type: "mat4"},
@@ -141,18 +251,14 @@ export function main() {
     );
 
     let mainScene = new Scene(gl, camera, {
-		// p1: new MeshInstance(pyramid, new ShaderInstance(basicShader), {fragmentColor: vec4.fromValues(1, 0, 0, 1)}),
-        // p2: new MeshInstance(pyramid, new ShaderInstance(basicShader), {fragmentColor: vec4.fromValues(0, 0, 1, 1)}),
-        h1: new House(vec3.fromValues(3, 1, -3), Math.PI/-4, vec4.fromValues(1, 0, 0, 1)),
-        h2: new House(vec3.fromValues(-3, 1, -3), -Math.PI/-4, vec4.fromValues(0, 0, 1, 1)),
-        h3: new House(vec3.fromValues(3, 1, 3), Math.PI/4, vec4.fromValues(0, 1, 0, 1)),
-        h4: new House(vec3.fromValues(-3, 1, 3), -Math.PI/4, vec4.fromValues(0, 0, 0, 1)),
-		coord: new MeshInstance(models.coord, new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0, 0, 1)}),
+		g: new MeshInstance(models.ground, new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0.5, 0, 1)}),
+        h1: new House(models.aFrameRoof,vec3.fromValues(3, 1, -3), Math.PI/-4, vec4.fromValues(1, 0, 0, 1)),
+        h2: new House(models.flatRoof,vec3.fromValues(-3, 1, -3), -Math.PI/-4, vec4.fromValues(0, 0, 1, 1)),
+        h3: new House(models.pyramidRoof,vec3.fromValues(3, 1, 3), Math.PI/4, vec4.fromValues(0, 1, 0, 1)),
+        h4: new House(models.coneRoof,vec3.fromValues(-3, 1, 3), -Math.PI/4, vec4.fromValues(0, 0, 0, 1)),
     });
 
     mainScene.setup = (o) => {
-        const coordScale = 50;
-        vec3.set(o.coord.scale, coordScale, coordScale, coordScale);
     };
 
     mainScene.update = (cam, o, time, dt) => {
@@ -188,12 +294,12 @@ function handelInput(cam, dt) {
 }
 
 class House {
-    constructor(pos, rot, color) {
+    constructor(roof, pos, rot, color) {
         this.position = pos;
         this.body = new MeshInstance(models.houseBody, new ShaderInstance(shaders.basic), {
             fragmentColor: color
         })
-        this.roof = new MeshInstance(models.houseRoof, new ShaderInstance(shaders.basic), {
+        this.roof = new MeshInstance(roof, new ShaderInstance(shaders.basic), {
             fragmentColor: vec4.fromValues(0.25, 0.25, 0.25, 1)
         })
         
