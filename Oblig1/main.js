@@ -1,4 +1,5 @@
 import {WebGLCanvas, Camera, Mesh, Shader, MeshInstance, ShaderInstance, Scene} from "./helpers.js";
+
 import "../gl-matrix.js";
 
 
@@ -14,53 +15,55 @@ const keys = {};
 
 const roofHeight = 1;
 
-const models = {
-    houseBody: new Mesh(gl, [
+function generateHouseMesh(height) {
+    return new Mesh(gl, [
         // Top
-        1, 1, -1,   // X Y Z
-        1, 1, 1,   // X Y Z
-        -1, 1, 1,   // X Y Z
+        1, height, -1,   // X Y Z
+        1, height, 1,   // X Y Z
+        -1, height, 1,   // X Y Z
 
-        -1, 1, 1,   // X Y Z
-        -1, 1, -1,   // X Y Z
-        1, 1, -1,   // X Y Z
+        -1, height, 1,   // X Y Z
+        -1, height, -1,   // X Y Z
+        1, height, -1,   // X Y Z
 
         // Front
-        1, 1, -1,     // X Y Z
-        1, 1, 1,      // X Y Z
+        1, height, -1,     // X Y Z
+        1, height, 1,      // X Y Z
         1, -1, 1,     // X Y Z
 
-        1, 1, -1,     // X Y Z
+        1, height, -1,     // X Y Z
         1, -1, -1,    // X Y Z
         1, -1, 1,     // X Y Z
 
         // Back
-        -1, 1, -1,    // X Y Z
-        -1, 1, 1,     // X Y Z
+        -1, height, -1,    // X Y Z
+        -1, height, 1,     // X Y Z
         -1, -1, 1,    // X Y Z
 
-        -1, 1, -1,    // X Y Z
+        -1, height, -1,    // X Y Z
         -1, -1, -1,   // X Y Z
         -1, -1, 1,    // X Y Z
 
         // Left
-        1, 1, 1,      // X Y Z
-        -1, 1, 1,     // X Y Z
+        1, height, 1,      // X Y Z
+        -1, height, 1,     // X Y Z
         1, -1, 1,     // X Y Z
 
         -1, -1, 1,    // X Y Z
-        -1, 1, 1,     // X Y Z
+        -1, height, 1,     // X Y Z
         1, -1, 1,     // X Y Z
 
         // Right
-        1, 1, -1,     // X Y Z
-        -1, 1, -1,    // X Y Z
+        1, height, -1,     // X Y Z
+        -1, height, -1,    // X Y Z
         1, -1, -1,    // X Y Z
 
         -1, -1, -1,   // X Y Z
-        -1, 1, -1,    // X Y Z
+        -1, height, -1,    // X Y Z
         1, -1, -1,    // X Y Z
-    ], 3),
+    ], 3);
+}
+const models = {
     aFrameRoof: new Mesh(gl, [
         // front
         1.3, 0, 1.3,     // X Y Z
@@ -93,13 +96,13 @@ const models = {
     ], 3),
     flatRoof: new Mesh(gl, [
         // Top
-        1.3, roofHeight, -1.3,      // X Y Z
-        1.3, roofHeight, 1.3,       // X Y Z
-        -1.3, roofHeight, 1.3,      // X Y Z
+        1.3, roofHeight/2, -1.3,      // X Y Z
+        1.3, roofHeight/2, 1.3,       // X Y Z
+        -1.3, roofHeight/2, 1.3,      // X Y Z
 
-        -1.3, roofHeight, 1.3,      // X Y Z
-        -1.3, roofHeight, -1.3,     // X Y Z
-        1.3, roofHeight, -1.3,      // X Y Z
+        -1.3, roofHeight/2, 1.3,      // X Y Z
+        -1.3, roofHeight/2, -1.3,     // X Y Z
+        1.3, roofHeight/2, -1.3,      // X Y Z
 
         // Bottom
         1.3, 0, -1.3,     // X Y Z
@@ -111,39 +114,39 @@ const models = {
         1.3, 0, -1.3,     // X Y Z
 
         // Front
-        1.3, roofHeight, -1.3,      // X Y Z
-        1.3, roofHeight, 1.3,       // X Y Z
+        1.3, roofHeight/2, -1.3,      // X Y Z
+        1.3, roofHeight/2, 1.3,       // X Y Z
         1.3, 0, 1.3,      // X Y Z
 
-        1.3, roofHeight, -1.3,      // X Y Z
+        1.3, roofHeight/2, -1.3,      // X Y Z
         1.3, 0, -1.3,     // X Y Z
         1.3, 0, 1.3,      // X Y Z
 
         // Back
-        -1.3, roofHeight, -1.3,     // X Y Z
-        -1.3, roofHeight, 1.3,      // X Y Z
+        -1.3, roofHeight/2, -1.3,     // X Y Z
+        -1.3, roofHeight/2, 1.3,      // X Y Z
         -1.3, 0, 1.3,     // X Y Z
 
-        -1.3, roofHeight, -1.3,     // X Y Z
+        -1.3, roofHeight/2, -1.3,     // X Y Z
         -1.3, 0, -1.3,    // X Y Z
         -1.3, 0, 1.3,     // X Y Z
 
         // Left
-        1.3, roofHeight, 1.3,       // X Y Z
-        -1.3, roofHeight, 1.3,      // X Y Z
+        1.3, roofHeight/2, 1.3,       // X Y Z
+        -1.3, roofHeight/2, 1.3,      // X Y Z
         1.3, 0, 1.3,      // X Y Z
 
         -1.3, 0, 1.3,     // X Y Z
-        -1.3, roofHeight, 1.3,      // X Y Z
+        -1.3, roofHeight/2, 1.3,      // X Y Z
         1.3, 0, 1.3,      // X Y Z
 
         // Right
-        1.3, roofHeight, -1.3,      // X Y Z
-        -1.3, roofHeight, -1.3,     // X Y Z
+        1.3, roofHeight/2, -1.3,      // X Y Z
+        -1.3, roofHeight/2, -1.3,     // X Y Z
         1.3, 0, -1.3,     // X Y Z
 
         -1.3, 0, -1.3,    // X Y Z
-        -1.3, roofHeight, -1.3,     // X Y Z
+        -1.3, roofHeight/2, -1.3,     // X Y Z
         1.3, 0, -1.3,     // X Y Z
 
     ], 3),
@@ -252,10 +255,10 @@ export function main() {
 
     let mainScene = new Scene(gl, camera, {
 		g: new MeshInstance(models.ground, new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0.5, 0, 1)}),
-        h1: new House(models.aFrameRoof,vec3.fromValues(3, 1, -3), Math.PI/-4, vec4.fromValues(1, 0, 0, 1)),
-        h2: new House(models.flatRoof,vec3.fromValues(-3, 1, -3), -Math.PI/-4, vec4.fromValues(0, 0, 1, 1)),
-        h3: new House(models.pyramidRoof,vec3.fromValues(3, 1, 3), Math.PI/4, vec4.fromValues(0, 1, 0, 1)),
-        h4: new House(models.coneRoof,vec3.fromValues(-3, 1, 3), -Math.PI/4, vec4.fromValues(0, 0, 0, 1)),
+        h1: new House(0.5 ,models.aFrameRoof, vec2.fromValues(3, -3), Math.PI/-4, vec4.fromValues(1, 0, 0, 1)),
+        h2: new House(2 , null, vec2.fromValues(-3, -3), -Math.PI/-4, vec4.fromValues(0, 0, 1, 1)),
+        h3: new House(5 ,models.pyramidRoof, vec2.fromValues(3, 3), Math.PI/4, vec4.fromValues(0, 1, 0, 1)),
+        h4: new House(1 ,models.coneRoof, vec2.fromValues(-3, 3), -Math.PI/4, vec4.fromValues(0, 0, 0, 1)),
     });
 
     mainScene.setup = (o) => {
@@ -294,25 +297,31 @@ function handelInput(cam, dt) {
 }
 
 class House {
-    constructor(roof, pos, rot, color) {
+    constructor(height, roof, pos, rot, color) {
         this.position = pos;
-        this.body = new MeshInstance(models.houseBody, new ShaderInstance(shaders.basic), {
+        this.body = new MeshInstance(generateHouseMesh(height), new ShaderInstance(shaders.basic), {
             fragmentColor: color
         })
-        this.roof = new MeshInstance(roof, new ShaderInstance(shaders.basic), {
-            fragmentColor: vec4.fromValues(0.25, 0.25, 0.25, 1)
-        })
+        if (roof) {
+            this.roof = new MeshInstance(roof, new ShaderInstance(shaders.basic), {
+                fragmentColor: vec4.fromValues(0.25, 0.25, 0.25, 1)
+            })
+        }
         
-        vec3.set(this.body.position, pos[0], pos[1], pos[2]);
+        vec3.set(this.body.position, pos[0], 1, pos[1]);
         mat4.rotateY(this.body.rotation, mat4.create(), rot);
         
-        
-        vec3.set(this.roof.position, pos[0], pos[1] + 1, pos[2])
-        mat4.rotateY(this.roof.rotation, mat4.create(), rot);
+        if (this.roof) {
+            vec3.set(this.roof.position, pos[0], 1 + height, pos[1])
+            mat4.rotateY(this.roof.rotation, mat4.create(), rot);
+        }
     }
     
     draw(camera) {
-        this.body.draw(camera);        
-        this.roof.draw(camera);
+        this.body.draw(camera);   
+
+        if (this.roof) {
+            this.roof.draw(camera);
+        }     
     }
 }
