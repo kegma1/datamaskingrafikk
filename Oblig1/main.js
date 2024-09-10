@@ -128,7 +128,6 @@ export function main() {
 
 function handelInput(cam, dt) {
     const rotSpeed = 2.0;  
-    const rotX = mat4.create();
     const rotY = mat4.create();
     
     if (keys['KeyA']) {
@@ -139,13 +138,12 @@ function handelInput(cam, dt) {
         mat4.rotateY(rotY, mat4.create(), rotSpeed * dt);
         vec3.transformMat4(cam.pos, cam.pos, rotY);
     }
+
     if (keys['KeyW']) {
-        mat4.rotateX(rotX, mat4.create(), -rotSpeed * dt);
-        vec3.transformMat4(cam.pos, cam.pos, rotX);
+        vec3.scale(cam.pos, cam.pos, 0.95)
     }
     if (keys['KeyS']) {
-        mat4.rotateX(rotX, mat4.create(), rotSpeed * dt);
-        vec3.transformMat4(cam.pos, cam.pos, rotX);
+        vec3.scale(cam.pos, cam.pos, 1.05)
     }
 
     cam.update_view()
