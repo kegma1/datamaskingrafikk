@@ -107,7 +107,7 @@ export function main() {
         o.windmillBlades.position = vec3.fromValues(0, windmillHeight -1, -9)
         o.windmillBlades.scale = vec3.fromValues(2, 2, 2)
 
-        let streetWidth = (o.h1.width  + o.h2.width + o.h3.width  + o.h4.width + gap * 3) / 2
+        let streetWidth = ((o.h1.width  + o.h2.width + o.h3.width  + o.h4.width + gap * 3) - 2) / 2
         o.h1.setPos(-streetWidth, 0);
         let nextHouse = o.h1.width + gap
         o.h2.setPos(nextHouse - streetWidth, 0);
