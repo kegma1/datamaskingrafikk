@@ -9,6 +9,8 @@ const webGLCanvas = new WebGLCanvas('myCanvas', document.body, 600, 600);
 let vertexShaderSource = document.getElementById('base-vertex-shader').innerHTML;
 let fragmentShaderSource = document.getElementById('base-fragment-shader').innerHTML;
 
+let WindSpeedField = document.getElementById("vindSpeed");
+
 const gl = webGLCanvas.gl;
 
 // Initialize an object to store the state of keys
@@ -34,6 +36,26 @@ const path = new Mesh(gl, [
     -50, 0, 50,   0, 0, 0, 1,   // X Y Z
 ], 7)
 
+const windmillHeight = 10
+const windmillBodyMesh = new Mesh(gl, generateCylinderMesh(1, windmillHeight, 20, 0, 0, 0, 1, 1, 1), 7);
+
+const windmillBladesMesh = new Mesh(gl, [
+    0, 0, 0,    0.5, 0.5, 0.5, 1,
+    0, 1, 0,    0.5, 0.5, 0.5, 1,
+    -1, 1, 0,   0.5, 0.5, 0.5, 1,
+
+    0, 0, 0,    0.5, 0.5, 0.5, 1,
+    0, -1, 0,   0.5, 0.5, 0.5, 1,
+    1, -1, 0,   0.5, 0.5, 0.5, 1,
+
+    0, 0, 0,    0.5, 0.5, 0.5, 1,
+    -1, 0, 0,    0.5, 0.5, 0.5, 1,
+    -1, -1, 0,   0.5, 0.5, 0.5, 1,
+
+    0, 0, 0,    0.5, 0.5, 0.5, 1,
+    1, 0, 0,   0.5, 0.5, 0.5, 1,
+    1, 1, 0,   0.5, 0.5, 0.5, 1,
+], 7)
 
 const shaders = {
     basic: new Shader(gl, vertexShaderSource, fragmentShaderSource, {
@@ -75,9 +97,16 @@ export function main() {
         h2: new House(gl, Math.ceil(Math.random() * maxHouses)),
         h3: new House(gl, Math.ceil(Math.random() * maxHouses)),
         h4: new House(gl, Math.ceil(Math.random() * maxHouses)),
+
+        windmillBody: new MeshInstance(windmillBodyMesh, new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0, 0, 1)}),
+        windmillBlades: new MeshInstance(windmillBladesMesh, new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0, 0, 1)}),
     });
 
     mainScene.setup = (o) => {
+        o.windmillBody.position = vec3.fromValues(0, 0, -10);
+        o.windmillBlades.position = vec3.fromValues(0, windmillHeight -1, -9)
+        o.windmillBlades.scale = vec3.fromValues(2, 2, 2)
+
         let streetWidth = (o.h1.width  + o.h2.width + o.h3.width  + o.h4.width + gap * 3) / 2
         o.h1.setPos(-streetWidth, 0);
         let nextHouse = o.h1.width + gap
@@ -89,8 +118,9 @@ export function main() {
     };
 
     mainScene.update = (cam, o, time, dt) => {
+        mat4.rotateZ(o.windmillBlades.rotation, o.windmillBlades.rotation, -WindSpeedField.value*dt)
+
 		handelInput(cam, dt);
-        
     };
 
     mainScene.start();
