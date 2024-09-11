@@ -1,5 +1,5 @@
 import {WebGLCanvas, Camera, Mesh, Shader, MeshInstance, ShaderInstance, Scene} from "./helpers.js";
-import {garageDoor, generateAFrameMesh, generateHouseMesh, mainHouseDecoration, otherDecoration, generatePyramidMesh, generateFlatMesh, generateConeMesh, generateCylinderMesh} from "./shapes.js"
+import {garageDoor, generateAFrameMesh, generateHouseMesh, mainHouseDecoration, otherDecoration, generatePyramidMesh, generateFlatMesh, generateConeMesh, generateCylinderMesh, generatePlank} from "./shapes.js"
 
 import "../gl-matrix.js";
 
@@ -27,13 +27,13 @@ const ground = new Mesh(gl, [
 ], 7)
 
 const path = new Mesh(gl, [
-    50, 0, 50,   0, 0, 0, 1,   // X Y Z
-    -50, 0, 50,   0, 0, 0, 1,   // X Y Z
-    50, 0, -50,   0, 0, 0, 1,   // X Y Z
+    1, 0.001, 1,   0, 0, 0, 1,   // X Y Z
+    -1, 0.001, 1,   0, 0, 0, 1,   // X Y Z
+    1, 0.001, -1,   0, 0, 0, 1,   // X Y Z
     
-    50, 0, -50,   0, 0, 0, 1,   // X Y Z
-    -50, 0, -50,   0, 0, 0, 1,   // X Y Z
-    -50, 0, 50,   0, 0, 0, 1,   // X Y Z
+    1, 0.001, -1,   0, 0, 0, 1,   // X Y Z
+    -1, 0.001, -1,   0, 0, 0, 1,   // X Y Z
+    -1, 0.001, 1,   0, 0, 0, 1,   // X Y Z
 ], 7)
 
 const windmillHeight = 10
@@ -88,11 +88,11 @@ export function main() {
     );
 
     let maxHouses = 3;
-    const gap = 1.5;
+    const gap = 2.5;
 
     let mainScene = new Scene(gl, camera, {
-		g: new MeshInstance(ground, new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0.5, 0, 1)}),
-		// path: new MeshInstance(ground, new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0.5, 0, 1)}),
+		g: new MeshInstance(ground, new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0.6, 0, 1)}),
+		path: new MeshInstance(path, new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0.25, 0.25, 0.25, 1)}),
         h1: new House(gl, Math.ceil(Math.random() * maxHouses)),
         h2: new House(gl, Math.ceil(Math.random() * maxHouses)),
         h3: new House(gl, Math.ceil(Math.random() * maxHouses)),
@@ -115,6 +115,9 @@ export function main() {
         o.h3.setPos(nextHouse - streetWidth, 0);
         nextHouse += o.h3.width + gap
         o.h4.setPos(nextHouse - streetWidth, 0);
+
+        o.path.scale = vec3.fromValues(streetWidth + 2, 1, 1);
+        o.path.position[2] = gap
     };
 
     mainScene.update = (cam, o, time, dt) => {
@@ -149,18 +152,59 @@ function handelInput(cam, dt) {
     cam.update_view()
 }
 
-class House {
-    constructor(gl, roomNums) {
-        this.mesh = new MeshInstance(new Mesh(gl, House.constructHouse(roomNums), 7), new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0, 0, 1)})
-        this.fence = new MeshInstance(new Mesh(gl, House.constructFence(roomNums), 7), new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0, 0, 1)})
-        this.width = roomNums * 2
-        
-        vec3.set(this.mesh.position, 0, 1, 0);
+class Fence {
+    constructor(gl, width, gap) {
+        this.mesh = new MeshInstance(new Mesh(gl, Fence.constructFence(width, gap), 7), new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0, 0, 1)})
     }
 
-    static constructFence(roomNums) {
+    static constructFence(width, gap) {
         let mesh = [];
-        return mesh;
+        // Planks
+        mesh.push(...generatePlank(width, 0.5, 0.25, -gap, -(2 - gap), true, 0.584, 0.271, 0.125))
+        mesh.push(...generatePlank(2, 0.5, 0.25, -(2 - gap), -0.5, false, 0.584, 0.271, 0.125))
+        mesh.push(...generatePlank(2, 0.5, 0.25, width - gap, -0.5, false, 0.584, 0.271, 0.125))
+
+        // Posts
+        mesh.push(...generateCylinderMesh(0.2, 1, 10, -(2 - gap), 0, 1 + gap, 0.310, 0.125, 0.059))
+        mesh.push(...generateCylinderMesh(0.2, 1, 10, -(2 - gap), 0, -1 - gap, 0.310, 0.125, 0.059))
+
+        mesh.push(...generateCylinderMesh(0.2, 1, 10, width - gap, 0, 1 + gap, 0.310, 0.125, 0.059))
+        mesh.push(...generateCylinderMesh(0.2, 1, 10, width - gap, 0, -1 - gap, 0.310, 0.125, 0.059))
+
+        return mesh
+    }
+
+    setPos(x, z) {
+        vec3.set(this.mesh.position, x, this.mesh.position[1], z);
+    }
+
+    draw(camera) {
+        this.mesh.draw(camera);   
+
+    }
+}
+
+class House {
+    constructor(gl, roomNums) {
+        this.width = roomNums * 2
+        let w = this.width -1
+
+        let pathMesh = [
+            w, 0.001, 1.5,   0, 0, 0, 1,   // X Y Z
+            -1, 0.001, 1.5,   0, 0, 0, 1,   // X Y Z
+            w, 0.001, -1,   0, 0, 0, 1,   // X Y Z
+            
+            w, 0.001, -1,   0, 0, 0, 1,   // X Y Z
+            -1, 0.001, -1,   0, 0, 0, 1,   // X Y Z
+            -1, 0.001, 1.5,   0, 0, 0, 1,   // X Y Z
+        ]
+        
+        this.mesh = new MeshInstance(new Mesh(gl, House.constructHouse(roomNums), 7), new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0, 0, 1)})
+        this.fence = new Fence(gl, this.width, 0.5)
+        this.path = new MeshInstance(new Mesh(gl, pathMesh, 7), new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0.25, 0.25, 0.25, 1)})
+        
+        
+        vec3.set(this.mesh.position, 0, 1, 0);
     }
 
     static constructHouse(roomNums) {
@@ -207,11 +251,13 @@ class House {
 
     setPos(x, z) {
         vec3.set(this.mesh.position, x, 1, z);
-        vec3.set(this.fence.position, x, 1, z);
+        vec3.set(this.path.position, x, this.path.position[1], z);
+        this.fence.setPos(x, z);
     }
     
     draw(camera) {
-        this.mesh.draw(camera);   
-
+        this.mesh.draw(camera); 
+        this.fence.draw(camera);
+        this.path.draw(camera);
     }
 }

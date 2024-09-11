@@ -268,5 +268,38 @@ export function generateCylinderMesh(radius, height, segments, x = 0, y = 0, z =
             x + radius * Math.cos(nextAngle), y, z + radius * Math.sin(nextAngle), r, g, b, 1,
         );
     }
-    return new Float32Array(vertices);
+    return vertices;
+}
+
+/**
+ * 
+ * @param {number} length how long the plank is
+ * @param {number} width how wide it is
+ * @param {number} height how high its off the ground
+ * @param {number} offsetX 
+ * @param {number} offsetZ 
+ * @param {boolean} orientation if true its aligned along the x axis, if false its aligned along the z axsis
+ */
+export function generatePlank(length, width, height, offsetX, offsetZ, orientation, r, g, b) {
+    if(orientation) {
+        return [
+            length + offsetX, height, offsetZ, r, g, b, 1,
+            -1 + offsetX, height, offsetZ, r, g, b, 1,
+            length + offsetX, height + width, offsetZ, r, g, b, 1,
+
+            -1 + offsetX, height + width, offsetZ, r, g, b, 1,
+            length + offsetX, height + width, offsetZ, r, g, b, 1,
+            -1 + offsetX, height, offsetZ, r, g, b, 1,
+        ]
+    } else {
+        return [
+            offsetX, height, length + offsetZ, r, g, b, 1,
+            offsetX, height, -1 + offsetZ, r, g, b, 1,
+            offsetX, height + width, length + offsetZ, r, g, b, 1,
+
+            offsetX, height + width, -1 + offsetZ, r, g, b, 1,
+            offsetX, height + width, length + offsetZ, r, g, b, 1,
+            offsetX, height, -1 + offsetZ, r, g, b, 1,
+        ]
+    }
 }
