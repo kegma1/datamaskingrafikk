@@ -284,22 +284,22 @@ export function generatePlank(length, width, height, offsetX, offsetZ, orientati
     if(orientation) {
         return [
             length + offsetX, height, offsetZ, r, g, b, 1,
-            -1 + offsetX, height, offsetZ, r, g, b, 1,
+            0 + offsetX, height, offsetZ, r, g, b, 1,
             length + offsetX, height + width, offsetZ, r, g, b, 1,
 
-            -1 + offsetX, height + width, offsetZ, r, g, b, 1,
+            0 + offsetX, height + width, offsetZ, r, g, b, 1,
             length + offsetX, height + width, offsetZ, r, g, b, 1,
-            -1 + offsetX, height, offsetZ, r, g, b, 1,
+            0 + offsetX, height, offsetZ, r, g, b, 1,
         ]
     } else {
         return [
             offsetX, height, length + offsetZ, r, g, b, 1,
-            offsetX, height, -1 + offsetZ, r, g, b, 1,
+            offsetX, height, 0 + offsetZ, r, g, b, 1,
             offsetX, height + width, length + offsetZ, r, g, b, 1,
 
-            offsetX, height + width, -1 + offsetZ, r, g, b, 1,
+            offsetX, height + width, 0 + offsetZ, r, g, b, 1,
             offsetX, height + width, length + offsetZ, r, g, b, 1,
-            offsetX, height, -1 + offsetZ, r, g, b, 1,
+            offsetX, height, 0 + offsetZ, r, g, b, 1,
         ]
     }
 }

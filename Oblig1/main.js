@@ -152,17 +152,27 @@ function handelInput(cam, dt) {
     cam.update_view()
 }
 
+const fenceCache = {}
 class Fence {
-    constructor(gl, width, gap) {
-        this.mesh = new MeshInstance(new Mesh(gl, Fence.constructFence(width, gap), 7), new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0, 0, 1)})
+    constructor(gl, width) {
+        this.mesh;
+        if (width in fenceCache) {
+            this.mesh = new MeshInstance(fenceCache[width], new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0, 0, 1)});   
+        } else {
+            let fenceMesh = new Mesh(gl, Fence.constructFence(width), 7);
+            this.mesh = new MeshInstance(fenceMesh, new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0, 0, 1)})
+            fenceCache[width] = fenceMesh;
+        }
+        console.log(width, fenceCache)
     }
 
-    static constructFence(width, gap) {
+    static constructFence(width) {
         let mesh = [];
+        const gap = 0.5;
         // Planks
-        mesh.push(...generatePlank(width, 0.5, 0.25, -gap, -(2 - gap), true, 0.584, 0.271, 0.125))
-        mesh.push(...generatePlank(2, 0.5, 0.25, -(2 - gap), -0.5, false, 0.584, 0.271, 0.125))
-        mesh.push(...generatePlank(2, 0.5, 0.25, width - gap, -0.5, false, 0.584, 0.271, 0.125))
+        mesh.push(...generatePlank(width + 2*gap, 0.5, 0.25, -1 - gap, -(2 - gap), true, 0.584, 0.271, 0.125))
+        mesh.push(...generatePlank(2 + 2*gap,       0.5, 0.25, -1 - gap, -1 - gap, false, 0.584, 0.271, 0.125))
+        mesh.push(...generatePlank(2 + 2*gap, 0.5, 0.25, width - gap, -1 - gap, false, 0.584, 0.271, 0.125))
 
         // Posts
         mesh.push(...generateCylinderMesh(0.2, 1, 10, -(2 - gap), 0, 1 + gap, 0.310, 0.125, 0.059))
@@ -179,8 +189,7 @@ class Fence {
     }
 
     draw(camera) {
-        this.mesh.draw(camera);   
-
+        this.mesh.draw(camera);
     }
 }
 
@@ -200,7 +209,7 @@ class House {
         ]
         
         this.mesh = new MeshInstance(new Mesh(gl, House.constructHouse(roomNums), 7), new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0, 0, 0, 1)})
-        this.fence = new Fence(gl, this.width, 0.5)
+        this.fence = new Fence(gl, this.width)
         this.path = new MeshInstance(new Mesh(gl, pathMesh, 7), new ShaderInstance(shaders.basic), {fragmentColor: vec4.fromValues(0.25, 0.25, 0.25, 1)})
         
         
