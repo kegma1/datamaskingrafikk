@@ -25,22 +25,8 @@
         uniform mat4 uProjectionMatrix;
 
         void main(void) {
-            // Standard vertex transformation
             gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);
             vColor = aVertexColor;
-        
-            // Define a threshold for the y-position
-            float yThreshold = -0.1;
-        
-            // Only darken the color if the vertex position is below the threshold
-            if (aVertexPosition[1] < yThreshold) {
-                float darkeningFactor = -(aVertexPosition[1]) * 0.3;
-        
-                // Darken the RGB channels proportionally to how far below the threshold the vertex is
-                vColor[0] -= darkeningFactor;
-                vColor[1] -= darkeningFactor;
-                vColor[2] -= darkeningFactor;
-            }
         }
     </script>
 

@@ -210,6 +210,9 @@ class House {
     static constructHouse(roomNums) {
         let mesh = [];
 
+        let mainHouse = Math.floor(Math.random() * roomNums) + 1;
+        let garage = Math.floor(Math.random() * roomNums) + 1;
+
         for (let i = 1; i <= roomNums; i++) {
             let height = Math.floor((Math.random()) * 3) + 1;
             
@@ -229,12 +232,13 @@ class House {
                 mesh.push(...generateFlatMesh(offset, height));
             } 
             
-            if (i == 1) {
+            if (i == mainHouse) {
                 mesh.push(...mainHouseDecoration(offset))
-            } else if (i == 2) {
-                mesh.push(...otherDecoration(offset, 0))
-            } else if (i == 3) {
+            } else if (i == garage) {
                 mesh.push(...garageDoor(offset))
+            }else {
+                mesh.push(...otherDecoration(offset, 0))
+
             }
             
             if ( height > 1) {
