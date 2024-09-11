@@ -289,7 +289,6 @@ export class Camera {
 }
 
 /**
- * 
  * @param {WebGL2RenderingContext} gl 
  * @param {Number} attributeLocation 
  * @param {WebGLBuffer} buffer 
