@@ -121,21 +121,34 @@ function handelInput(cam, dt) {
     const rotSpeed = 2.0;  
     const rotY = mat4.create();
     
-    if (keys['KeyA']) {
+    if (keys['ArrowLeft']) {
         mat4.rotateY(rotY, mat4.create(), -rotSpeed * dt);
         vec3.transformMat4(cam.pos, cam.pos, rotY);
     }
-    if (keys['KeyD']) {
+    if (keys['ArrowRight']) {
         mat4.rotateY(rotY, mat4.create(), rotSpeed * dt);
         vec3.transformMat4(cam.pos, cam.pos, rotY);
     }
-
-    if (keys['KeyW']) {
+    if (keys['ArrowUp']) {
         vec3.scale(cam.pos, cam.pos, 0.95)
     }
-    if (keys['KeyS']) {
+    if (keys['ArrowDown']) {
         vec3.scale(cam.pos, cam.pos, 1.05)
     }
+
+    if (keys["KeyW"]) {cube_manager.moveHead(0, 0, -1); keys["KeyW"] = false}
+    if (keys["KeyS"]) {cube_manager.moveHead(0, 0, 1); keys["KeyS"] = false}
+    if (keys["KeyA"]) {cube_manager.moveHead(-1, 0, 0); keys["KeyA"] = false}
+    if (keys["KeyD"]) {cube_manager.moveHead(1, 0, 0); keys["KeyD"] = false}
+    if (keys["KeyE"]) {cube_manager.moveHead(0, 1, 0); keys["KeyE"] = false}
+    if (keys["KeyQ"]) {cube_manager.moveHead(0, -1, 0); keys["KeyQ"] = false}
+
+    if (keys["Space"]) {
+        cube_manager.drawOnMove = !cube_manager.drawOnMove; 
+        document.getElementById("drawWithMove").checked  = cube_manager.drawOnMove;
+        keys["Space"] = false;
+    }
+        
 
     cam.update_view()
 }
