@@ -16,15 +16,24 @@ const gl = webGLCanvas.gl;
 const keys = {};
 const w = 2;
 const grid_mesh = generateGridMesh(gl, w, 50);
+export let pointLight = [5, 5, 5];
+export let ambientColor = [0.2, 0.2, 0.2]
 
 const shaders = {
     basic: new Shader(gl, vertexShaderSource, fragmentShaderSource, {
-        vertexPosition: {name: "aVertexPosition", size: 3, stride: 7 * Float32Array.BYTES_PER_ELEMENT, offset: 0},
-        vertexColor: {name: "aVertexColor", size: 4, stride: 7 * Float32Array.BYTES_PER_ELEMENT, offset: 3 * Float32Array.BYTES_PER_ELEMENT},
+        vertexPosition: {name: "aVertexPosition", size: 3, stride: 10 * Float32Array.BYTES_PER_ELEMENT, offset: 0},
+        vertexNormala: {name: "aVertexNormal", size: 3, stride: 10 * Float32Array.BYTES_PER_ELEMENT, offset: 3 * Float32Array.BYTES_PER_ELEMENT},
+        vertexColor: {name: "aVertexColor", size: 4, stride: 10 * Float32Array.BYTES_PER_ELEMENT, offset: 6 * Float32Array.BYTES_PER_ELEMENT},
     }, {
         fragmentColor: {name: "uFragColor", type: "vec4"},
         projectionMatrix: {name: "uProjectionMatrix", type: "mat4"},
         modelViewMatrix: {name: "uModelViewMatrix", type: "mat4"},
+        modelMatrix: {name: "uModelMatrix", type: "mat4"},
+        normalMatrix: {name: "uNormalMatrix", type: "mat4"},
+
+        lightPosition: {name: "uLightPosition", type: "vec3"},
+        ambientLightColor: {name: "uAmbientLightColor", type: "vec3"},
+        diffuseLightColor: {name: "uDiffuseLightColor", type: "vec3"},
     }),
 }
 
@@ -68,10 +77,9 @@ export function main() {
         1000.0
     );
 
-    
 
     let mainScene = new Scene(gl, camera, {
-        g: new MeshInstance(grid_mesh, new ShaderInstance(shaders.basic), {fragmentColor: [0, 0, 0, 1]}),
+        g: new MeshInstance(grid_mesh, new ShaderInstance(shaders.basic), {diffuseLightColor: [0, 0, 0], lightPosition: pointLight, ambientLightColor: ambientColor}),
         cm: cube_manager,
     });
 

@@ -69,8 +69,14 @@ export class MeshInstance {
         let modelViewMatrix = mat4.create();
         mat4.multiply(modelViewMatrix, camera.viewMatrix, modelMatrix);
 
+        let normalMatrix = mat4.create();
+        mat4.invert(normalMatrix, modelMatrix);
+        mat4.transpose(normalMatrix, normalMatrix);
+
         this.shader.set("projectionMatrix", camera.projectionMatrix);
         this.shader.set("modelViewMatrix", modelViewMatrix);
+        this.shader.set("modelMatrix", modelMatrix);
+        this.shader.set("normalMatrix", normalMatrix);
 
         this.shader.bind(constants);
         this.mesh.bind(this.shader);

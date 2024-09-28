@@ -1,4 +1,5 @@
 import { MeshInstance, ShaderInstance } from "./helpers.js";
+import { ambientColor, pointLight } from "./main.js";
 import { generateCubeMesh } from "./shapes.js";
 
 export class CubeManager {
@@ -10,7 +11,11 @@ export class CubeManager {
         this.cubes = [];
         this.cubeMesh = generateCubeMesh(gl, w);
         this.drawOnMove = true;
-        this.head = new MeshInstance(generateCubeMesh(gl, w + 0.2), new ShaderInstance(shader), {fragmentColor: [1, 1, 1, 1]});
+        this.head = new MeshInstance(generateCubeMesh(gl, w + 0.2), new ShaderInstance(shader), {
+            diffuseLightColor: [1, 1, 1], 
+            lightPosition: pointLight, 
+            ambientLightColor: ambientColor
+        });
     }
 
     get headPos() {
@@ -29,12 +34,16 @@ export class CubeManager {
     addCubeAtHead() {
         let color;
         if (this.randomColor) {
-            color = [Math.random(), Math.random(), Math.random(), 1];
+            color = [Math.random(), Math.random(), Math.random()];
         } else {
-            color = [1, 0, 0, 1];
+            color = [1, 0, 0];
         }
 
-        let newCube = new MeshInstance(this.cubeMesh, new ShaderInstance(this.shader), {fragmentColor: color});
+        let newCube = new MeshInstance(this.cubeMesh, new ShaderInstance(this.shader), {
+            diffuseLightColor: color,
+            lightPosition: pointLight, 
+            ambientLightColor: ambientColor
+        });
         newCube.position = [...this.head.position];
         this.cubes.push(newCube);
     }
