@@ -96,6 +96,28 @@
         }
     </script>
 
+    <script id="base-vertex-shader-point" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+
+        uniform mat4 uModelViewMatrix;
+        uniform mat4 uProjectionMatrix;
+
+        void main(void) {
+            gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);
+            gl_PointSize = 10.0; 
+        }
+    </script>
+
+    <script id="base-fragment-shader-point" type="x-shader/x-fragment">
+        precision mediump float;
+
+        uniform vec4 uFragColor;
+
+        void main(void) {
+           gl_FragColor = uFragColor;
+        }
+    </script>
+
     <script type="module">
         import {main} from "./main.js";
         main();

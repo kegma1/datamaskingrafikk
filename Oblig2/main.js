@@ -1,4 +1,4 @@
-import {WebGLCanvas, Camera, Shader, MeshInstance, ShaderInstance, Scene} from "./helpers.js";
+import {WebGLCanvas, Camera, Shader, MeshInstance, ShaderInstance, Scene,Mesh} from "./helpers.js";
 import { generateGridMesh} from "./shapes.js"
 import { CubeManager } from "./cubeManager.js";
 
@@ -9,6 +9,10 @@ const webGLCanvas = new WebGLCanvas('myCanvas', document.body, 800, 800);
 
 let vertexShaderSource = document.getElementById('base-vertex-shader').innerHTML;
 let fragmentShaderSource = document.getElementById('base-fragment-shader').innerHTML;
+
+let vertexShaderSourcePoint = document.getElementById('base-vertex-shader-point').innerHTML;
+let fragmentShaderSourcePoint = document.getElementById('base-fragment-shader-point').innerHTML;
+
 let fpsDisplay = document.getElementById("FPSdisplay")
 const gl = webGLCanvas.gl;
 
@@ -18,6 +22,8 @@ const w = 2;
 const grid_mesh = generateGridMesh(gl, w, 50);
 export let pointLight = [5, 5, 5];
 export let ambientColor = [0.2, 0.2, 0.2]
+
+let pointMesh = new Mesh(gl, [0, 0, 0], 3, null, gl.POINTS)
 
 const shaders = {
     basic: new Shader(gl, vertexShaderSource, fragmentShaderSource, {
@@ -34,6 +40,14 @@ const shaders = {
         lightPosition: {name: "uLightPosition", type: "vec3"},
         ambientLightColor: {name: "uAmbientLightColor", type: "vec3"},
         diffuseLightColor: {name: "uDiffuseLightColor", type: "vec3"},
+    }),
+
+    point: new Shader(gl, vertexShaderSourcePoint, fragmentShaderSourcePoint, {
+        vertexPosition: {name: "aVertexPosition"},
+    }, {
+        fragmentColor: {name: "uFragColor", type: "vec4"},
+        projectionMatrix: {name: "uProjectionMatrix", type: "mat4"},
+        modelViewMatrix: {name: "uModelViewMatrix", type: "mat4"},
     }),
 }
 
@@ -79,12 +93,20 @@ export function main() {
 
 
     let mainScene = new Scene(gl, camera, {
-        g: new MeshInstance(grid_mesh, new ShaderInstance(shaders.basic), {diffuseLightColor: [0, 0, 0], lightPosition: pointLight, ambientLightColor: ambientColor}),
+        g: new MeshInstance(grid_mesh, new ShaderInstance(shaders.basic), {
+            diffuseLightColor: [0, 0, 0], 
+            lightPosition: pointLight, 
+            ambientLightColor: ambientColor
+        }),
         cm: cube_manager,
+        light: new MeshInstance(pointMesh, new ShaderInstance(shaders.point), {
+            fragmentColor: [1, 0, 0, 1],
+        })
     });
 
     mainScene.setup = (o) => {
         o.g.position[1] -= w/2
+        o.light.position = pointLight
     };
 
     mainScene.update = (cam, o, time, dt) => {

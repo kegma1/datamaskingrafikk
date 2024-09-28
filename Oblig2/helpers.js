@@ -107,7 +107,9 @@ export class ShaderInstance {
     }
 
     set(name, v) {
-        this.uniforms[name].value = v;
+        if (name in this.uniforms) {
+            this.uniforms[name].value = v;
+        }
     }
 
     bind(constants) {
@@ -140,12 +142,12 @@ export class ShaderInstance {
 }
 
 export class Mesh {
-    constructor(gl, vertexData, vertexLength, indexData = null,mode = null) {
+    constructor(gl, vertexData, vertexLength, indexData = null, mode = null) {
         /**@type {WebGL2RenderingContext} */
         this.gl = gl;
         this.buffers = {};
 
-        if (!mode) {
+        if (mode == null) {
             this.mode = gl.TRIANGLES
         } else {
             this.mode = mode
