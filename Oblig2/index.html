@@ -25,6 +25,24 @@
             <button class="controlButtons" onclick="cube_manager.moveHead(0, 0, 1);">+Z</button>
             <button class="controlButtons" onclick="cube_manager.moveHead(0, -1, 0);">-Y</button>
         </div>
+        <h3>Tegn ved flytt</h3>
+        <label class="switch">
+            <input type="checkbox" id="drawWithMove" checked>
+            <span class="slider round"></span>
+        </label>
+        
+        <h3>Bruk tilfeldige farger</h3>
+        <label class="switch">
+            <input type="checkbox" id="randomColors" checked>
+            <span class="slider round"></span>
+        </label>
+
+        <h3>Styrekubeposisjon</h3>
+        <div class="pos-div">
+            <input type="number" id="pos-input-x" value="0">
+            <input type="number" id="pos-input-y" value="0">
+            <input type="number" id="pos-input-z" value="0">
+        </div>
     </div>
 
     <script id="base-vertex-shader" type="x-shader/x-vertex">
@@ -80,6 +98,19 @@
         min-width: 50px;
         height: 40px;
         box-sizing: border-box;
+    }
+
+    .pos-div {
+        display: flex;
+
+    }
+
+    .pos-div input {
+        margin: 0;
+        padding: 5px 5px;
+        width: 2rem;
+        appearance: textfield;
+        text-align: center;
     }
    </style>
 </body>

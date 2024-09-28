@@ -40,6 +40,24 @@ window.addEventListener('keyup', (event) => {
 export const cube_manager =  new CubeManager(gl, w, shaders.basic);
 window.cube_manager = cube_manager;
 
+document.getElementById("drawWithMove").addEventListener("change", function() {
+    cube_manager.drawOnMove = this.checked;
+});
+
+document.getElementById("randomColors").addEventListener("change", function() {
+    cube_manager.randomColor = this.checked;
+});
+
+document.getElementById("pos-input-x").addEventListener("change", function() {
+    cube_manager.headPos[0] = this.value * w
+})
+document.getElementById("pos-input-y").addEventListener("change", function() {
+    cube_manager.headPos[1] = this.value * w
+})
+document.getElementById("pos-input-z").addEventListener("change", function() {
+    cube_manager.headPos[2] = this.value * w
+})
+
 export function main() {
     let camera = new Camera(
         vec3.fromValues( 0, 10, 20),
