@@ -5,11 +5,11 @@ import { CubeManager } from "./cubeManager.js";
 import "../gl-matrix.js";
 
 
-const webGLCanvas = new WebGLCanvas('myCanvas', document.body, 600, 600);
+const webGLCanvas = new WebGLCanvas('myCanvas', document.body, 800, 800);
 
 let vertexShaderSource = document.getElementById('base-vertex-shader').innerHTML;
 let fragmentShaderSource = document.getElementById('base-fragment-shader').innerHTML;
-
+let fpsDisplay = document.getElementById("FPSdisplay")
 const gl = webGLCanvas.gl;
 
 
@@ -80,6 +80,7 @@ export function main() {
     };
 
     mainScene.update = (cam, o, time, dt) => {
+        fpsDisplay.innerHTML = `FPS: ${Math.round(1 / dt)}`
         handelInput(cam, dt)
     };
 
