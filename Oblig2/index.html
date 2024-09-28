@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL grunnleggende</title>
+    
+    <!-- <script src="../webgl24_std/base/lib/cuon-matrix.js"></script> -->
+    <script src="../gl-matrix.js"></script>
+    <script src="./helpers.js" type="module" ></script>
+    <script src="./shapes.js" type="module" ></script>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="ui">
+        <h3>Styr spiller</h3>
+        <div class="controllGrid">
+            <span></span>
+            <button class="controlButtons" onclick="cube_manager.moveHead(0, 0, -1);">-Z</button>
+            <span></span>
+            <button class="controlButtons" onclick="cube_manager.moveHead(-1, 0, 0);">-X</button>
+            <button class="controlButtons" onclick="cube_manager.addCubeAtHead();">+</button>
+            <button class="controlButtons" onclick="cube_manager.moveHead(1, 0, 0);">+X</button>
+            <button class="controlButtons" onclick="cube_manager.moveHead(0, 1, 0);">+Y</button>
+            <button class="controlButtons" onclick="cube_manager.moveHead(0, 0, 1);">+Z</button>
+            <button class="controlButtons" onclick="cube_manager.moveHead(0, -1, 0);">-Y</button>
+        </div>
+    </div>
+
+    <script id="base-vertex-shader" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+
+        attribute vec4 aVertexColor;
+        varying lowp vec4 vColor;
+
+        uniform mat4 uModelViewMatrix;
+        uniform mat4 uProjectionMatrix;
+
+        void main(void) {
+            gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);
+            vColor = aVertexColor;
+        }
+    </script>
+
+    <script id="base-fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        varying lowp vec4 vColor;  
+        
+        uniform vec4 uFragColor;
+
+        void main(void) {
+           gl_FragColor =  vColor + uFragColor;
+        }
+    </script>
+
+    <script type="module">
+        import {main} from "./main.js";
+        main();
+    </script>
+
+   <style>
+    .ui {
+        display: flex;
+        flex-direction: column;
+        max-width: fit-content;
+    }
+
+    .controllGrid {
+        display: grid;
+        gap: 5px;
+        grid-template-columns: repeat(3, 1fr);
+        max-width: fit-content;
+    }
+
+    .controlButtons {
+        margin: 0;
+        padding: 5px 10px;
+        max-width: fit-content;
+        min-width: 50px;
+        height: 40px;
+        box-sizing: border-box;
+    }
+   </style>
+</body>
+</html>
