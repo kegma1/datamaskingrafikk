@@ -39,11 +39,17 @@ function createWheelPairMesh(mat) {
 
     let gWheel = new THREE.CylinderGeometry(WR, WR, WW, 20);
     let leftWheel = new THREE.Mesh(gWheel, mat);
+    leftWheel.castShadow = true;
+    leftWheel.name = "leftWheel";
+
     leftWheel.rotateX(Math.PI/2)
     leftWheel.position.z -= (CW - WW)/2
     wheelPair.add(leftWheel);
 
     let rightWheel = new THREE.Mesh(gWheel, mat);
+    rightWheel.castShadow = true;
+    rightWheel.name = "rightWheel";
+
     rightWheel.rotateX(Math.PI/2)
     rightWheel.position.z += (CW - WW)/2
     wheelPair.add(rightWheel)

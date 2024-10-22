@@ -65,7 +65,7 @@ function addSceneObjects() {
 function addLights() {
 	//Retningsorientert lys (som gir skygge):
 	let directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.0); //farge, intensitet (1=default)
-	directionalLight1.position.set(90, 300, 0);
+	directionalLight1.position.set(90, 300, 90);
 	directionalLight1.castShadow = true;
 
 	// Viser lyskilden:
