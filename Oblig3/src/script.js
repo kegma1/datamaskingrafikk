@@ -4,6 +4,7 @@ import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls
 import { addCoordSystem } from "../static/lib/wfa-coord"
 import { createGroundMesh } from './objects/ground';
 import { createCraneMesh } from './objects/crane';
+import tierFrontTexture from '../static/tierFront.png'; 
 
 const ri = {
     currentlyPressedKeys: []
@@ -52,12 +53,21 @@ export function main() {
 }
 
 function addSceneObjects() {
-	addCoordSystem(ri.scene);
+    addCoordSystem(ri.scene);
 
-    ri.scene.add(createGroundMesh());
-    ri.scene.add(createCraneMesh());
+    const loadingManager = new THREE.LoadingManager();
+    const textureLoader = new THREE.TextureLoader(loadingManager);
+    const textureObjects = [];
 
-    animate(0)
+    textureObjects[0] = textureLoader.load(tierFrontTexture)
+
+    loadingManager.onLoad = () => {
+        ri.scene.add(createGroundMesh());
+        ri.scene.add(createCraneMesh(textureObjects));
+
+        animate(0)
+    }
+
 	
 }
 
@@ -65,7 +75,7 @@ function addSceneObjects() {
 function addLights() {
 	//Retningsorientert lys (som gir skygge):
 	let directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.0); //farge, intensitet (1=default)
-	directionalLight1.position.set(90, 300, 90);
+	directionalLight1.position.set(200, 300, 200);
 	directionalLight1.castShadow = true;
 
 	// Viser lyskilden:

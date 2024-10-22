@@ -11,19 +11,37 @@ const WW = 50; // wheel width
 const CL = WB + CaL; // crane lenght
 const WR = 150/2 // wheel radius
 
+const ORL = 200; // outrigger lenght
+const ORW = 20; // width of outrigger legs
 
 
-export function createCraneMesh() {
+
+export function createCraneMesh(textureObjects) {
     const crane = new THREE.Group();
-    let material = new THREE.MeshPhongMaterial();
-    let glassMaterial = new THREE.MeshLambertMaterial({
+    let MetalMaterial = new THREE.MeshStandardMaterial({
+        color: 0xc0c0c0,
+        metalness: 1,
+        roughness: 0.5,
+    });
+    let glassMaterial = new THREE.MeshStandardMaterial({
         color: 0x90e1f5,
         opacity: 0.7,
         transparent: true,
-        reflectivity: true,
     })
+    let tierMaterial = new THREE.MeshStandardMaterial({
+        // color: 0x505050,
+        // metalness: 0,
+        // roughness: 1,
+        map: textureObjects[0]
+    });
+    let bodyMaterial = new THREE.MeshStandardMaterial({
+        color: 0xfcfcfc,
+        metalness: 0,
+        roughness: 0.25,
+    });
 
-    const craneBase = createBaseMesh(material);
+
+    const craneBase = createBaseMesh(MetalMaterial);
     crane.add(craneBase);
 
     let wheelbase = crane.getObjectByName("wheelbase");
@@ -34,24 +52,58 @@ export function createCraneMesh() {
 
         firstWheel - (WR*2)*3, firstWheel - (WR*2)*4, firstWheel - (WR*2)*5
     ]
-    for (let wheelPairPos of wheelPairPositions) {
-        let wheelPairMesh = createWheelPairMesh(material);
-        wheelPairMesh.position.x = wheelPairPos;
+    for (let i = 0; i < wheelPairPositions.length; i++) {
+        let wheelPairMesh = createWheelPairMesh(tierMaterial);
+        wheelPairMesh.position.x = wheelPairPositions[i];
+        wheelPairMesh.name = `wheelPair${i}`
         
         wheelbase.add(wheelPairMesh);
     }
 
-    let outriggerPair1 = createOutriggerPair(material);
+    let outriggerPair1 = createOutriggerPair(MetalMaterial);
     outriggerPair1.position.x = firstWheel - (WR*2)*2
+    outriggerPair1.name = "outriggerPair1"
     wheelbase.add(outriggerPair1)
 
+    let outriggerPair2 = createOutriggerPair(MetalMaterial);
+    outriggerPair2.position.x = (firstWheel - (WR*2)*6) + 30
+    outriggerPair2.name = "outriggerPair2"
+    wheelbase.add(outriggerPair2)
+
     let cabBase = crane.getObjectByName("cabBase");
-    let cab = createCabMesh(material, glassMaterial);
+    let cab = createCabMesh(bodyMaterial, glassMaterial);
     cab.position.y = (BH/2)
     cab.position.z -= CaH
     cabBase.add(cab)
 
+    let platform = createPlatformMesh(bodyMaterial);
+    platform.position.y += BH
+    wheelbase.add(platform)
+    let platformTop = crane.getObjectByName("top")
+
+    console.log(crane)
     return crane
+}
+
+function createPlatformMesh(mat) {
+    const platform = new THREE.Group();
+    const topH = 10;
+
+    let gBody = new THREE.BoxGeometry(WB, BH, CW - WW*2);
+    let body = new THREE.Mesh(gBody, mat);
+    body.castShadow = true;
+    body.name = "body";
+    platform.add(body);
+
+    let gTop= new THREE.BoxGeometry(WB, topH, CW);
+    let top = new THREE.Mesh(gTop, mat);
+    top.castShadow = true;
+    top.name = "top"
+    top.position.y = (BH/2) + topH/2
+    
+    platform.add(top);
+
+    return platform
 }
 
 function createCabMesh(bodyMat, glassMat) {
@@ -59,9 +111,9 @@ function createCabMesh(bodyMat, glassMat) {
 
     const BackWidth = CaL/3;
 
-    let gBase = new THREE.BoxGeometry(CaL - BackWidth, (CaH - WinH) * 0.4 , CaW)
+    let gBase = new THREE.BoxGeometry(CaL, (CaH - WinH) * 0.4 , CaW*3)
     let base = new THREE.Mesh(gBase, bodyMat);
-    base.position.x += BackWidth/2
+    base.position.z += (CaW*3)/3
     base.position.y = ((CaH - WinH) * 0.4)/2
     base.castShadow = true;
     cab.add(base)
@@ -95,8 +147,39 @@ function createCabMesh(bodyMat, glassMat) {
 
 function createOutriggerPair(mat) {
     const outriggerPair = new THREE.Group();
+    let leftFoot = createOutriggerFoot(mat);
+    leftFoot.name = "LeftFoot"
+    leftFoot.position.z -= CW - WW*2
+
+    outriggerPair.add(leftFoot)
+
+    let rightFoot = createOutriggerFoot(mat);
+    rightFoot.name = "RightFoot"
+    rightFoot.position.z += CW - WW*2
+    rightFoot.rotateY(Math.PI)
+
+    outriggerPair.add(rightFoot)
+
 
     return outriggerPair
+}
+
+function createOutriggerFoot(mat) {
+    const outriggerFoot = new THREE.Group();
+
+    let gBar = new THREE.BoxGeometry(ORW, ORW, ORL);
+    let bar = new THREE.Mesh(gBar, mat);
+    bar.castShadow = true;
+    outriggerFoot.add(bar);
+    
+    let gFoot = new THREE.CylinderGeometry((ORW/2) - 2, (ORW/2) - 2, WW + BH/2, 20);
+    let foot = new THREE.Mesh(gFoot, mat);
+    foot.position.z -= (ORL/2) - 10
+    foot.position.y -= (WW + BH/2)/2
+    foot.castShadow = true
+    bar.add(foot)
+
+    return outriggerFoot
 }
 
 function createWheelPairMesh(mat) {
