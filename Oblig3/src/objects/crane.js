@@ -154,9 +154,39 @@ function createCraneMesh(metalMat, bodyMat, glassMat) {
     
     maxExtention = CL;
     minExtention = hookW/2;
+
+    let hook = createHookMesh(metalMat);
+    hook.name = "hookPoint"
+    hook.position.x = CL/2;
+    craneExtender.add(hook)
     
     crane.name = "crane"
     return crane
+}
+
+function createHookMesh(mat) {
+    const hookPoint = new THREE.Group();
+
+    let gHook = new THREE.TorusKnotGeometry(10, 5, 20, 8, 6, 3)
+    let hook = new THREE.Mesh(gHook, mat)
+    hook.name = "hook";
+    hook.castShadow = true;
+    hook.position.y -= 50
+    hookPoint.add(hook)
+
+    let points = [hookPoint.position.clone(), hook.position.clone()];
+    let gRope = new THREE.BufferGeometry().setFromPoints(points);
+    let ropeMat = new THREE.LineBasicMaterial({ color: 0x000000 })
+    let rope = new THREE.Line(gRope, ropeMat);
+    hookPoint.add(rope)
+
+    hookPoint.updateRope = () => {
+        let hookPointPos = hookPoint.position;
+        let hookPos = hook.position;
+        rope.geometry.setFromPoints([new THREE.Vector3(), hookPos.clone()])
+    }
+
+    return hookPoint;
 }
 
 function createPlatformMesh(mat) {

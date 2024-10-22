@@ -117,6 +117,8 @@ function animate(currentTime) {
     const crane = ri.scene.getObjectByName("crane")
     const arm = crane.getObjectByName("craneArm")
     const armExtender = arm.getObjectByName("craneExtender")
+    const hookPoint = armExtender.getObjectByName("hookPoint")
+    const hook = hookPoint.getObjectByName("hook")
     const outriggers = [ri.scene.getObjectByName("outriggerPair1"), ri.scene.getObjectByName("outriggerPair2")]
     const wheels = ri.scene.getObjectByName("wheels");
     
@@ -135,7 +137,7 @@ function animate(currentTime) {
 
     ri.controls.update();
 
-    handleKeys(delta, crane, arm, armExtender, outriggers, wheels);
+    handleKeys(delta, crane, arm, armExtender, outriggers, wheels, hookPoint, hook);
     renderScene();
 }
 
@@ -143,12 +145,22 @@ function renderScene() {
     ri.renderer.render(ri.scene, ri.camera);
 }
 
-function handleKeys(delta, crane, arm, armExtender, outriggers, wheels) {
+function handleKeys(delta, crane, arm, armExtender, outriggers, wheels, hookPoint, hook) {
     let rotationSpeed = (Math.PI);
     let exstendSpeed = 400;
     let steeringSpeed = (Math.PI);
+    let hookSpeed = 200
+    let minHeight = 175.0
 
     const steeringWheels = [wheels.children[0], wheels.children[1]];
+
+    let hookWorldPos = hook.getWorldPosition(new THREE.Vector3());
+
+    if (hookWorldPos.y < minHeight) {
+        const offset = minHeight - hookWorldPos.y;
+    
+        hook.position.y += offset;
+    }
     
     // rotate crane
     if (ri.currentlyPressedKeys['KeyA']) { 
@@ -164,12 +176,20 @@ function handleKeys(delta, crane, arm, armExtender, outriggers, wheels) {
     if (ri.currentlyPressedKeys['KeyW']) { 
         arm.rotation.z  = arm.rotation.z + (rotationSpeed * delta);
         arm.rotation.z  %= (Math.PI * 2); 
-        arm.rotation.z = Math.min(arm.rotation.z, Math.PI/2) 
+        arm.rotation.z = Math.min(arm.rotation.z, Math.PI/6) 
+
+        hookPoint.rotation.z  = hookPoint.rotation.z - (rotationSpeed * delta);
+        hookPoint.rotation.z  %= (Math.PI * 2); 
+        hookPoint.rotation.z = Math.max(hookPoint.rotation.z, -Math.PI/6) 
 	}
     if (ri.currentlyPressedKeys['KeyS']) { 
         arm.rotation.z  = arm.rotation.z - (rotationSpeed * delta);
         arm.rotation.z  %= (Math.PI * 2);  
         arm.rotation.z = Math.max(arm.rotation.z, 0) 
+
+        hookPoint.rotation.z  = hookPoint.rotation.z + (rotationSpeed * delta);
+        hookPoint.rotation.z  %= (Math.PI * 2); 
+        hookPoint.rotation.z = Math.min(hookPoint.rotation.z, 0) 
 	}
 
     // exstend arm
@@ -249,6 +269,18 @@ function handleKeys(delta, crane, arm, armExtender, outriggers, wheels) {
             }
         }
     }
+
+    if (ri.currentlyPressedKeys['KeyQ']) {
+        if (hookWorldPos.y > minHeight) {
+            hook.position.y = hook.position.y - (hookSpeed * delta)
+        }
+    }
+    if (ri.currentlyPressedKeys['KeyE']) { 
+        hook.position.y = hook.position.y + (hookSpeed * delta)
+        hook.position.y = Math.min(hook.position.y, -50)
+    }
+    
+    hookPoint.updateRope()
 }
 
 function onWindowResize() {
