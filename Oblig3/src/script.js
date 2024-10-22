@@ -5,6 +5,7 @@ import { addCoordSystem } from "../static/lib/wfa-coord"
 import { createGroundMesh } from './objects/ground';
 import { createCraneMesh } from './objects/crane';
 import tierFrontTexture from '../static/tierFront.png'; 
+import tierSideTexture from '../static/tier.jpg'; 
 
 const ri = {
     currentlyPressedKeys: []
@@ -60,6 +61,7 @@ function addSceneObjects() {
     const textureObjects = [];
 
     textureObjects[0] = textureLoader.load(tierFrontTexture)
+    textureObjects[1] = textureLoader.load(tierSideTexture)
 
     loadingManager.onLoad = () => {
         ri.scene.add(createGroundMesh());

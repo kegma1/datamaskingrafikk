@@ -28,11 +28,11 @@ export function createCraneMesh(textureObjects) {
         opacity: 0.7,
         transparent: true,
     })
-    let tierMaterial = new THREE.MeshStandardMaterial({
-        // color: 0x505050,
-        // metalness: 0,
-        // roughness: 1,
+    let tierFrontMaterial = new THREE.MeshStandardMaterial({
         map: textureObjects[0]
+    });
+    let tierSidesMaterial = new THREE.MeshStandardMaterial({
+        map: textureObjects[1]
     });
     let bodyMaterial = new THREE.MeshStandardMaterial({
         color: 0xfcfcfc,
@@ -40,6 +40,10 @@ export function createCraneMesh(textureObjects) {
         roughness: 0.25,
     });
 
+    tierSidesMaterial.map.wrapS = THREE.RepeatWrapping; 
+    tierSidesMaterial.map.wrapT = THREE.RepeatWrapping; 
+    tierSidesMaterial.map.repeat.set(5, 1); 
+    tierSidesMaterial.map.needsUpdate = true;
 
     const craneBase = createBaseMesh(MetalMaterial);
     crane.add(craneBase);
@@ -53,7 +57,7 @@ export function createCraneMesh(textureObjects) {
         firstWheel - (WR*2)*3, firstWheel - (WR*2)*4, firstWheel - (WR*2)*5
     ]
     for (let i = 0; i < wheelPairPositions.length; i++) {
-        let wheelPairMesh = createWheelPairMesh(tierMaterial);
+        let wheelPairMesh = createWheelPairMesh(tierSidesMaterial, tierFrontMaterial);
         wheelPairMesh.position.x = wheelPairPositions[i];
         wheelPairMesh.name = `wheelPair${i}`
         
@@ -182,27 +186,67 @@ function createOutriggerFoot(mat) {
     return outriggerFoot
 }
 
-function createWheelPairMesh(mat) {
+// function createWheelPairMesh(mat) {
+//     const wheelPair = new THREE.Group();
+
+//     let gWheel = new THREE.CylinderGeometry(WR, WR, WW, 20);
+//     let leftWheel = new THREE.Mesh(gWheel, mat);
+//     leftWheel.castShadow = true;
+//     leftWheel.name = "leftWheel";
+
+//     leftWheel.rotateX(Math.PI/2)
+//     leftWheel.position.z -= (CW - WW)/2
+//     wheelPair.add(leftWheel);
+
+//     let rightWheel = new THREE.Mesh(gWheel, mat);
+//     rightWheel.castShadow = true;
+//     rightWheel.name = "rightWheel";
+
+//     rightWheel.rotateX(Math.PI/2)
+//     rightWheel.position.z += (CW - WW)/2
+//     wheelPair.add(rightWheel)
+
+//     return wheelPair
+// }
+
+function createWheelPairMesh(sideTexture, frontTexture) {
     const wheelPair = new THREE.Group();
 
-    let gWheel = new THREE.CylinderGeometry(WR, WR, WW, 20);
-    let leftWheel = new THREE.Mesh(gWheel, mat);
-    leftWheel.castShadow = true;
-    leftWheel.name = "leftWheel";
-
-    leftWheel.rotateX(Math.PI/2)
-    leftWheel.position.z -= (CW - WW)/2
+    // Create the left wheel
+    const leftWheel = createWheel(sideTexture, frontTexture);
+    leftWheel.position.z -= (CW - WW) / 2; // Adjust position for left wheel
     wheelPair.add(leftWheel);
 
-    let rightWheel = new THREE.Mesh(gWheel, mat);
-    rightWheel.castShadow = true;
-    rightWheel.name = "rightWheel";
+    // Create the right wheel
+    const rightWheel = createWheel(sideTexture, frontTexture);
+    rightWheel.position.z += (CW - WW) / 2; // Adjust position for right wheel
+    wheelPair.add(rightWheel);
 
-    rightWheel.rotateX(Math.PI/2)
-    rightWheel.position.z += (CW - WW)/2
-    wheelPair.add(rightWheel)
+    return wheelPair;
+}
 
-    return wheelPair
+function createWheel(sideMaterial, frontMaterial) {
+    const wheelGroup = new THREE.Group();
+    
+    // Create the cylinder for the sides
+    const sideGeometry = new THREE.CylinderGeometry(WR, WR, WW, 20, 20, true);
+    const sideCylinder = new THREE.Mesh(sideGeometry, sideMaterial);
+    sideCylinder.castShadow = true;
+    sideCylinder.name = "wheelSides";
+    sideCylinder.rotateX(Math.PI / 2); // Rotate to align with the ground
+
+    // Create the front and back discs
+    const frontGeometry = new THREE.CircleGeometry(WR, 20);
+    const frontDisc = new THREE.Mesh(frontGeometry, frontMaterial);
+    frontDisc.castShadow = true;
+    frontDisc.name = "wheelFront";
+    frontDisc.position.z = (WW/2)
+
+
+    wheelGroup.add(sideCylinder);
+    wheelGroup.add(frontDisc);
+
+    return wheelGroup;
 }
 
 
