@@ -59,30 +59,33 @@ function createCabMesh(bodyMat, glassMat) {
     let base = new THREE.Mesh(gBase, bodyMat);
     base.position.x += BackWidth/2
     base.position.y = ((CaH - WinH) * 0.4)/2
+    base.castShadow = true;
     cab.add(base)
 
     let gBack = new THREE.BoxGeometry(BackWidth, CaH, CaW);
     let back = new THREE.Mesh(gBack, bodyMat);
     back.position.x = -(CaL - BackWidth)/2;
     back.position.y = CaH/2;
+    back.castShadow = true;
     cab.add(back)
 
     let gRoof = new THREE.BoxGeometry(BackWidth*2, (CaH - WinH) * 0.6, CaW)
     let roof = new THREE.Mesh(gRoof, bodyMat);
     roof.position.y = CaH - ((CaH - WinH) * 0.6)/2;
     roof.position.x = BackWidth/2
+    roof.castShadow = true;
     cab.add(roof);
 
     let gSideWin = new THREE.BoxGeometry(BackWidth*2, WinH, CaW)
     let sideWin = new THREE.Mesh(gSideWin, glassMat);
     sideWin.position.y = WinH/2 + ((CaH - WinH) * 0.4)
     sideWin.position.x = BackWidth/2
+    sideWin.castShadow = true;
     cab.add(sideWin)
 
     /*
         finner ingen god måte å lage en rampe på så det blir en ganske firkantet kabin
     */
-
     return cab
 }
 
