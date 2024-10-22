@@ -23,17 +23,22 @@ export let minExtention = 0;
 
 
 
-export function createVehichleMesh(textureObjects) {
+export function createVehichleMesh(textureObjects, envMap) {
     const crane = new THREE.Group();
     let MetalMaterial = new THREE.MeshStandardMaterial({
-        color: 0xc0c0c0,
+        color: 0xfcfcfc,
+        normalMap: textureObjects[3],
         metalness: 1,
-        roughness: 0.5,
+        roughness: 0.25,
+        envMap: envMap,
     });
     let glassMaterial = new THREE.MeshStandardMaterial({
         color: 0x90e1f5,
-        opacity: 0.7,
+        opacity: 0.8,
         transparent: true,
+        metalness: 1,
+        roughness: 0.01,
+        envMap: envMap,
     })
     let tierFrontMaterial = new THREE.MeshStandardMaterial({
         map: textureObjects[0]
@@ -43,8 +48,13 @@ export function createVehichleMesh(textureObjects) {
     });
     let bodyMaterial = new THREE.MeshStandardMaterial({
         color: 0xfcfcfc,
-        metalness: 0,
-        roughness: 0.25,
+        roughness: 0.5,
+        envMap: envMap,
+    });
+    let redMaterial = new THREE.MeshStandardMaterial({
+        color: 0xff0000,
+        roughness: 0.5,
+        envMap: envMap,
     });
 
     tierSidesMaterial.map.wrapS = THREE.RepeatWrapping; 
@@ -85,10 +95,18 @@ export function createVehichleMesh(textureObjects) {
     wheelbase.add(outriggerPair2)
 
     let cabBase = crane.getObjectByName("cabBase");
-    let cab = createCabMesh(bodyMaterial, glassMaterial);
+    let cab = createCabMesh(MetalMaterial, glassMaterial);
     cab.position.y = (BH/2)
     cab.position.z -= CaH
     cabBase.add(cab)
+
+    let gCover = new THREE.BoxGeometry(CaL, (CaH - WinH) * 0.4 , (CaW * 2))
+    let cover = new THREE.Mesh(gCover, redMaterial);
+    cover.position.y = ((CaH - WinH) * 0.4)/2 + BH/2
+    cover.position.z += CaW/2
+    cabBase.add(cover)
+
+    addHeadLights(cabBase)
 
     let platform = createPlatformMesh(bodyMaterial);
     platform.position.y += BH
@@ -119,7 +137,7 @@ function createCraneMesh(metalMat, bodyMat, glassMat) {
     cranePlatform.castShadow = true;
     crane.add(cranePlatform);
 
-    let craneCab = createCabMesh(bodyMat, glassMat);
+    let craneCab = createCabMesh(metalMat, glassMat);
     craneCab.position.y = CPH/2;
     craneCab.position.z -= CaH;
     craneCab.position.x = (CaL) - VW/2;
@@ -162,6 +180,32 @@ function createCraneMesh(metalMat, bodyMat, glassMat) {
     
     crane.name = "crane"
     return crane
+}
+
+function addHeadLights(cabBase) {
+    let sLightLeft = new THREE.SpotLight(0xFFBF00, 0.5, 500, Math.PI*0.3, 0, 0)
+	sLightLeft.castShadow = true;
+	sLightLeft.shadow.camera.near = 10;
+	sLightLeft.shadow.camera.far = 30;
+    sLightLeft.position.set(CaW, 0, -CaL/2)
+    sLightLeft.target.position.set(sLightLeft.position.x +1, sLightLeft.position.y, sLightLeft.position.z)
+    sLightLeft.target.position.x += 1
+    const sLightLeftHelper = new THREE.SpotLightHelper( sLightLeft );
+    cabBase.add(sLightLeft.target)
+    cabBase.add(sLightLeft)
+    cabBase.add(sLightLeftHelper)
+
+    let sLightRight = new THREE.SpotLight(0xFFBF00, 0.5, 500, Math.PI*0.3, 0, 0)
+	sLightRight.castShadow = true;
+	sLightRight.shadow.camera.near = 10;
+	sLightRight.shadow.camera.far = 30;
+    sLightRight.position.set(CaW, 0, CaL/2)
+    sLightRight.target.position.set(sLightRight.position.x +1, sLightRight.position.y, sLightRight.position.z)
+    sLightRight.target.position.x += 1
+    const sLightRightHelper = new THREE.SpotLightHelper( sLightRight );
+    cabBase.add(sLightRight.target)
+    cabBase.add(sLightRight)
+    cabBase.add(sLightRightHelper)
 }
 
 function createHookMesh(mat) {
@@ -215,9 +259,9 @@ function createCabMesh(bodyMat, glassMat) {
 
     const BackWidth = CaL/3;
 
-    let gBase = new THREE.BoxGeometry(CaL, (CaH - WinH) * 0.4 , CaW*3)
+    let gBase = new THREE.BoxGeometry(CaL - BackWidth, (CaH - WinH) * 0.4 , CaW)
     let base = new THREE.Mesh(gBase, bodyMat);
-    base.position.z += (CaW*3)/3
+    base.position.x += CaW/3
     base.position.y = ((CaH - WinH) * 0.4)/2
     base.castShadow = true;
     cab.add(base)

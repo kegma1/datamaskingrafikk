@@ -6,6 +6,15 @@ import { createGroundMesh } from './objects/ground';
 import { createVehichleMesh, maxExtention , minExtention, WR} from './objects/crane';
 import tierFrontTexture from '../static/tierFront.png'; 
 import tierSideTexture from '../static/tier.jpg'; 
+import metalMapTexture from "../static/enviormentMap.jpg"
+import metalNormalMapTexture from "../static/metalNormal.png"
+import grassTexture from "../static/Grass.png"
+import px from '../static/GardenNook/px.png';
+import nx from '../static/GardenNook/nx.png';
+import py from '../static/GardenNook/py.png';
+import ny from '../static/GardenNook/ny.png';
+import pz from '../static/GardenNook/pz.png';
+import nz from '../static/GardenNook/nz.png';
 
 const speedometer = document.getElementById("speed");
 
@@ -41,9 +50,9 @@ export function main() {
     // ri.lilGui = new GUI();
 
     ri.camera = new THREE.PerspectiveCamera(74, window.innerWidth / window.innerHeight, 0.1, 10000);
-    ri.camera.position.x = 230;
+    ri.camera.position.x = 700;
 	ri.camera.position.y = 400;
-	ri.camera.position.z = 350;
+	ri.camera.position.z = 500;
 	ri.camera.up = new THREE.Vector3(0, 1, 0);
 	let target = new THREE.Vector3(0.0, 0.0, 0.0);
 	ri.camera.lookAt(target);
@@ -68,19 +77,23 @@ function addSceneObjects() {
 
     const loadingManager = new THREE.LoadingManager();
     const textureLoader = new THREE.TextureLoader(loadingManager);
+    const cubeTextureLoader = new THREE.CubeTextureLoader(loadingManager);
     const textureObjects = [];
 
     textureObjects[0] = textureLoader.load(tierFrontTexture)
     textureObjects[1] = textureLoader.load(tierSideTexture)
+    textureObjects[2] = textureLoader.load(metalMapTexture)
+    textureObjects[3] = textureLoader.load(metalNormalMapTexture)
+    textureObjects[4] = textureLoader.load(grassTexture)
+    let envMap = cubeTextureLoader.load([px, nx, py, ny, pz, nz])
+
 
     loadingManager.onLoad = () => {
-        ri.scene.add(createGroundMesh());
-        ri.scene.add(createVehichleMesh(textureObjects));
+        ri.scene.add(createGroundMesh(textureObjects[4] ));
+        ri.scene.add(createVehichleMesh(textureObjects, envMap));
         speedometer.innerText = `${ri.scene.getObjectByName("wheels").speedKmph.toFixed(2)} Km/t`
         animate(0)
     }
-
-	
 }
 
 
@@ -91,9 +104,9 @@ function addLights() {
 	directionalLight1.castShadow = true;
 
 	// Viser lyskilden:
-	const directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight1, 10, 0xff0000);
-	directionalLightHelper.visible = true;
-	ri.scene.add(directionalLightHelper);
+	const directional1LightHelper = new THREE.DirectionalLightHelper( directionalLight1, 10, 0xff0000);
+	directional1LightHelper.visible = true;
+	ri.scene.add(directional1LightHelper);
 	// Setter verdier til shadow camera:
 	directionalLight1.shadow.camera.near = 0;
 	directionalLight1.shadow.camera.far = 4000;
@@ -102,11 +115,35 @@ function addLights() {
 	directionalLight1.shadow.camera.top = 4000;
 	directionalLight1.shadow.camera.bottom = -4000;
 	//Hjelpeklasse for å vise lysets utstrekning:
-	let lightCamHelper = new THREE.CameraHelper( directionalLight1.shadow.camera );
-	lightCamHelper.visible = false;
-	ri.scene.add( lightCamHelper );
+	let lightCamHelper1 = new THREE.CameraHelper( directionalLight1.shadow.camera );
+	lightCamHelper1.visible = false;
+	ri.scene.add( lightCamHelper1 );
 
 	ri.scene.add(directionalLight1);
+
+
+    //Retningsorientert lys (som gir skygge):
+	let directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.0); //farge, intensitet (1=default)
+	directionalLight2.position.set(-200, 300, -200);
+	directionalLight2.castShadow = true;
+
+	// Viser lyskilden:
+	const directional2LightHelper = new THREE.DirectionalLightHelper( directionalLight2, 10, 0xff0000);
+	directional2LightHelper.visible = true;
+	ri.scene.add(directional2LightHelper);
+	// Setter verdier til shadow camera:
+	directionalLight2.shadow.camera.near = 0;
+	directionalLight2.shadow.camera.far = 4000;
+	directionalLight2.shadow.camera.left = -4000;
+	directionalLight2.shadow.camera.right = 4000;
+	directionalLight2.shadow.camera.top = 4000;
+	directionalLight2.shadow.camera.bottom = -4000;
+	//Hjelpeklasse for å vise lysets utstrekning:
+	let lightCamHelper2 = new THREE.CameraHelper( directionalLight2.shadow.camera );
+	lightCamHelper2.visible = false;
+	ri.scene.add( lightCamHelper2 );
+
+	ri.scene.add(directionalLight2);
 }
 
   
