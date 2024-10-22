@@ -1,17 +1,27 @@
 import * as THREE from "three";
 
+const CW = 300; // crane width
 const BH = 50; // base height
 const WB = 1000; // wheelbase lenght
 const CaL = 200; // cab lenght
+const CaW = CW/3; // cab width
+const CaH = 100; // cab height
+const WinH = 100 * 0.6; // window height
 const WW = 50; // wheel width
 const CL = WB + CaL; // crane lenght
-const CW = 300; // crane width
 const WR = 150/2 // wheel radius
+
 
 
 export function createCraneMesh() {
     const crane = new THREE.Group();
     let material = new THREE.MeshPhongMaterial();
+    let glassMaterial = new THREE.MeshLambertMaterial({
+        color: 0x90e1f5,
+        opacity: 0.7,
+        transparent: true,
+        reflectivity: true,
+    })
 
     const craneBase = createBaseMesh(material);
     crane.add(craneBase);
@@ -31,7 +41,49 @@ export function createCraneMesh() {
         wheelbase.add(wheelPairMesh);
     }
 
+    let cabBase = crane.getObjectByName("cabBase");
+    let cab = createCabMesh(material, glassMaterial);
+    cab.position.y = (BH/2)
+    cab.position.z -= CaH
+    cabBase.add(cab)
+
     return crane
+}
+
+function createCabMesh(bodyMat, glassMat) {
+    const cab = new THREE.Group();
+
+    const BackWidth = CaL/3;
+
+    let gBase = new THREE.BoxGeometry(CaL - BackWidth, (CaH - WinH) * 0.4 , CaW)
+    let base = new THREE.Mesh(gBase, bodyMat);
+    base.position.x += BackWidth/2
+    base.position.y = ((CaH - WinH) * 0.4)/2
+    cab.add(base)
+
+    let gBack = new THREE.BoxGeometry(BackWidth, CaH, CaW);
+    let back = new THREE.Mesh(gBack, bodyMat);
+    back.position.x = -(CaL - BackWidth)/2;
+    back.position.y = CaH/2;
+    cab.add(back)
+
+    let gRoof = new THREE.BoxGeometry(BackWidth*2, (CaH - WinH) * 0.6, CaW)
+    let roof = new THREE.Mesh(gRoof, bodyMat);
+    roof.position.y = CaH - ((CaH - WinH) * 0.6)/2;
+    roof.position.x = BackWidth/2
+    cab.add(roof);
+
+    let gSideWin = new THREE.BoxGeometry(BackWidth*2, WinH, CaW)
+    let sideWin = new THREE.Mesh(gSideWin, glassMat);
+    sideWin.position.y = WinH/2 + ((CaH - WinH) * 0.4)
+    sideWin.position.x = BackWidth/2
+    cab.add(sideWin)
+
+    /*
+        finner ingen god måte å lage en rampe på så det blir en ganske firkantet kabin
+    */
+
+    return cab
 }
 
 function createWheelPairMesh(mat) {
