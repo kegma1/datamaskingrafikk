@@ -85,7 +85,33 @@ export function createCraneMesh(textureObjects) {
     wheelbase.add(platform)
     let platformTop = crane.getObjectByName("top")
 
+    let craneUnit = createCraneUnit(bodyMaterial, glassMaterial);
+    craneUnit.position.y = 10
+    craneUnit.position.x = firstWheel - (WR*2)*4
+
+    platformTop.add(craneUnit)
+
+
     console.log(crane)
+    return crane
+}
+
+function createCraneUnit(bodyMat, glassMat) {
+    let crane = new THREE.Group();
+
+    const CPH = 10;
+
+    let gCranePlatform = new THREE.BoxGeometry(CW, CPH, CW);
+    let cranePlatform = new THREE.Mesh(gCranePlatform, bodyMat);
+    cranePlatform.castShadow = true;
+    crane.add(cranePlatform);
+
+    let craneCab = createCabMesh(bodyMat, glassMat);
+    craneCab.position.y = CPH/2;
+    craneCab.position.z -= CaH;
+    craneCab.position.x = (CaL) - CW/2;
+    cranePlatform.add(craneCab);
+
     return crane
 }
 
@@ -242,9 +268,17 @@ function createWheel(sideMaterial, frontMaterial) {
     frontDisc.name = "wheelFront";
     frontDisc.position.z = (WW/2)
 
+    const backGeometry = new THREE.CircleGeometry(WR, 20);
+    const backDisc = new THREE.Mesh(backGeometry, frontMaterial);
+    backDisc.castShadow = true;
+    backDisc.name = "wheelback";
+    backDisc.position.z = -(WW/2)
+    backDisc.rotateY(Math.PI)
+
 
     wheelGroup.add(sideCylinder);
     wheelGroup.add(frontDisc);
+    wheelGroup.add(backDisc);
 
     return wheelGroup;
 }
