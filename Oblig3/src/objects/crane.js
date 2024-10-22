@@ -41,6 +41,10 @@ export function createCraneMesh() {
         wheelbase.add(wheelPairMesh);
     }
 
+    let outriggerPair1 = createOutriggerPair(material);
+    outriggerPair1.position.x = firstWheel - (WR*2)*2
+    wheelbase.add(outriggerPair1)
+
     let cabBase = crane.getObjectByName("cabBase");
     let cab = createCabMesh(material, glassMaterial);
     cab.position.y = (BH/2)
@@ -87,6 +91,12 @@ function createCabMesh(bodyMat, glassMat) {
         finner ingen god måte å lage en rampe på så det blir en ganske firkantet kabin
     */
     return cab
+}
+
+function createOutriggerPair(mat) {
+    const outriggerPair = new THREE.Group();
+
+    return outriggerPair
 }
 
 function createWheelPairMesh(mat) {

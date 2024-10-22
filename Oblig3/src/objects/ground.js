@@ -9,7 +9,6 @@ export function createGroundMesh() {
     groundMesh.receiveShadow = true;	//NB!
     
     groundMesh.rotation.x = Math.PI / 2;
-    groundMesh.position.y = -5;
 
     return groundMesh
 }
