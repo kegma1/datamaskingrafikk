@@ -17,6 +17,9 @@ const ORW = 20; // width of outrigger legs
 const CL = 800; // crane lenght
 const CW = 60; // crane width
 
+export let maxExtention = 0;
+export let minExtention = 0;
+
 
 
 
@@ -97,6 +100,7 @@ export function createVehichleMesh(textureObjects) {
 
 
     console.log(crane)
+    crane.name = "vehicle"
     return crane
 }
 
@@ -126,13 +130,16 @@ function createCraneMesh(metalMat, bodyMat, glassMat) {
     craneBase.position.x = -((VW/2) - baseW/2)
     cranePlatform.add(craneBase)
 
+    let craneArmGroup = new THREE.Group();
+    craneArmGroup.name = "craneArm"
+
     let gCraneArm = new THREE.BoxGeometry(CL, CW, CW);
     let craneArm = new THREE.Mesh(gCraneArm, bodyMat);
     craneArm.castShadow = true;
-    craneArm.name = "craneArm"
     craneArm.position.x = CL/2
     craneArm.position.y = 5
-    craneBase.add(craneArm)
+    craneBase.add(craneArmGroup)
+    craneArmGroup.add(craneArm)
 
     let gCraneExtender = new THREE.BoxGeometry(CL + hookW, CW - 20, CW - 20);
     let craneExtender = new THREE.Mesh(gCraneExtender, metalMat);
@@ -142,8 +149,10 @@ function createCraneMesh(metalMat, bodyMat, glassMat) {
 
     craneArm.add(craneExtender)
     
+    maxExtention = CL;
+    minExtention = hookW/2;
     
-
+    crane.name = "crane"
     return crane
 }
 

@@ -3,12 +3,20 @@ import * as THREE from "three";
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { addCoordSystem } from "../static/lib/wfa-coord"
 import { createGroundMesh } from './objects/ground';
-import { createVehichleMesh } from './objects/crane';
+import { createVehichleMesh, maxExtention , minExtention} from './objects/crane';
 import tierFrontTexture from '../static/tierFront.png'; 
 import tierSideTexture from '../static/tier.jpg'; 
 
 const ri = {
     currentlyPressedKeys: []
+}
+
+function handleKeyDown(event) {
+    ri.currentlyPressedKeys[event.code] = true;
+}
+
+function handleKeyUp(event) {
+    ri.currentlyPressedKeys[event.code] = false;
 }
 
 export function main() {
@@ -46,7 +54,7 @@ export function main() {
 
     window.addEventListener("resize", onWindowResize, false);
 
-    document.addEventListener('keyup', handleKeyUp, false); //handleKeyUp og handleKeyDown må eksistere.
+    document.addEventListener('keyup', handleKeyUp, false); 
 
     document.addEventListener('keydown', handleKeyDown, false);
 
@@ -110,8 +118,7 @@ function animate(currentTime) {
 
     ri.controls.update();
 
-    handleKeys(delta);
-
+    handleKeys(delta, ri.scene);
     renderScene();
 }
 
@@ -119,21 +126,55 @@ function renderScene() {
     ri.renderer.render(ri.scene, ri.camera);
 }
 
-function handleKeyDown(event) {
-    ri.currentlyPressedKeys[event.key] = true;
-}
+function handleKeys(delta, scene) {
+    let rotationSpeed = (Math.PI);
+    let exstendSpeed = 400;
+    const crane = scene.getObjectByName("crane")
+    const arm = crane.getObjectByName("craneArm")
+    const armExtender = arm.getObjectByName("craneExtender")
+    
+    // rotate crane
+    if (ri.currentlyPressedKeys['ArrowLeft']) { 
+        crane.rotation.y  = crane.rotation.y + (rotationSpeed * delta);
+        crane.rotation.y  %= (Math.PI * 2);  
+	}
+    if (ri.currentlyPressedKeys['ArrowRight']) { 
+        crane.rotation.y  = crane.rotation.y - (rotationSpeed * delta);
+        crane.rotation.y  %= (Math.PI * 2);  
+	}
 
-function handleKeyUp(event) {
-    ri.currentlyPressedKeys[event.key] = false;
-}
+    // Lift crane arm
+    if (ri.currentlyPressedKeys['ArrowUp']) { 
+        arm.rotation.z  = arm.rotation.z + (rotationSpeed * delta);
+        arm.rotation.z  %= (Math.PI * 2); 
+        arm.rotation.z = Math.min(arm.rotation.z, Math.PI/2) 
+	}
+    if (ri.currentlyPressedKeys['ArrowDown']) { 
+        arm.rotation.z  = arm.rotation.z - (rotationSpeed * delta);
+        arm.rotation.z  %= (Math.PI * 2);  
+        arm.rotation.z = Math.max(arm.rotation.z, 0) 
+	}
 
-function handleKeys(delta) {
-    // if (ri.currentlyPressedKeys["ArrowUp"]) {
-    //     ri.camera.position.z -= delta * 5;
-    // }
-    // if (ri.currentlyPressedKeys["ArrowDown"]) {
-    //     ri.camera.position.z += delta * 5;
-    // }
+    // exstend arm
+    if (ri.currentlyPressedKeys['ShiftRight']) { 
+        armExtender.position.x  = armExtender.position.x + (exstendSpeed * delta);
+        armExtender.position.x = Math.min(armExtender.position.x, maxExtention)  
+	}
+    if (ri.currentlyPressedKeys['ControlRight']) { 
+        armExtender.position.x  = armExtender.position.x - (exstendSpeed * delta);
+        armExtender.position.x = Math.max(armExtender.position.x, minExtention) 
+	}
+
+	//Roter joint1:
+	// if (ri.currentlyPressedKeys['KeyS']) {	//S
+	// 	arm.joint1Rot = arm.joint1Rot + (rotationSpeed * delta);
+	// 	arm.joint1Rot %= (Math.PI * 2); // "Rull rundt" dersom arm.joint1Rot >= 360 grader.
+	// }
+	// if (ri.currentlyPressedKeys['KeyW']) {	//W
+	// 	arm.joint1Rot = arm.joint1Rot - (rotationSpeed * delta);
+	// 	arm.joint1Rot %= (Math.PI * 2); // "Rull rundt" dersom arm.joint1Rot >= 360 grader.
+	// }
+
 }
 
 function onWindowResize() {
