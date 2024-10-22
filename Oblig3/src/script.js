@@ -1,8 +1,9 @@
 import './style.css';
 import * as THREE from "three";
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { addCoordSystem } from "../static/lib/wfa-coord"
 import { createGroundMesh } from './objects/ground';
+import { createCraneMesh } from './objects/crane';
 
 const ri = {
     currentlyPressedKeys: []
@@ -36,7 +37,7 @@ export function main() {
 	ri.camera.lookAt(target);
 
 
-    ri.controls = new OrbitControls(ri.camera, ri.renderer.domElement);
+    ri.controls = new TrackballControls(ri.camera, ri.renderer.domElement);
     ri.controls.addEventListener("change", renderScene);
 
     ri.clock = new THREE.Clock();
@@ -54,32 +55,10 @@ function addSceneObjects() {
 	addCoordSystem(ri.scene);
 
     ri.scene.add(createGroundMesh());
+    ri.scene.add(createCraneMesh());
 
     animate(0)
-	//Laster førs nødvendige teksturer:
-	// const loader = new THREE.TextureLoader();
-	// loader.load(
-	// 	'',
-	// 	(textureObject)=> {
-	// 		//Fortsetter her når nedlastinger er ferdig!
-
-	// 		// Plan:
-	// 		let gPlane = new THREE.PlaneGeometry(600, 600, 10, 10);
-	// 		let mPlane = new THREE.MeshLambertMaterial({ color: 0x91aff11, side: THREE.DoubleSide, wireframe:false });
-	// 		let meshPlane = new THREE.Mesh(gPlane, mPlane);
-	// 		meshPlane.rotation.x = Math.PI / 2;
-	// 		meshPlane.receiveShadow = true;	//NB!
-	// 		ri.scene.add(meshPlane);
-
-
-	// 		// Start animasjonsløkka:
-	// 		animate(0);
-	// 	},
-	// 	undefined,
-	// 	(error)=> {
-	// 		console.log(error)
-	// 	}
-	// );
+	
 }
 
 
