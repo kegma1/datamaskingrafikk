@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { addCoordSystem } from "../static/lib/wfa-coord"
 import { createGroundMesh } from './objects/ground';
-import { createCraneMesh } from './objects/crane';
+import { createVehichleMesh } from './objects/crane';
 import tierFrontTexture from '../static/tierFront.png'; 
 import tierSideTexture from '../static/tier.jpg'; 
 
@@ -65,7 +65,7 @@ function addSceneObjects() {
 
     loadingManager.onLoad = () => {
         ri.scene.add(createGroundMesh());
-        ri.scene.add(createCraneMesh(textureObjects));
+        ri.scene.add(createVehichleMesh(textureObjects));
 
         animate(0)
     }

@@ -1,22 +1,26 @@
 import * as THREE from "three";
 
-const CW = 300; // crane width
+const VW = 300; // vehicle width
 const BH = 50; // base height
 const WB = 1000; // wheelbase lenght
 const CaL = 200; // cab lenght
-const CaW = CW/3; // cab width
+const CaW = VW/3; // cab width
 const CaH = 100; // cab height
 const WinH = 100 * 0.6; // window height
 const WW = 50; // wheel width
-const CL = WB + CaL; // crane lenght
+const VL = WB + CaL; // vehicle lenght
 const WR = 150/2 // wheel radius
 
 const ORL = 200; // outrigger lenght
 const ORW = 20; // width of outrigger legs
 
+const CL = 800; // crane lenght
+const CW = 60; // crane width
 
 
-export function createCraneMesh(textureObjects) {
+
+
+export function createVehichleMesh(textureObjects) {
     const crane = new THREE.Group();
     let MetalMaterial = new THREE.MeshStandardMaterial({
         color: 0xc0c0c0,
@@ -49,7 +53,7 @@ export function createCraneMesh(textureObjects) {
     crane.add(craneBase);
 
     let wheelbase = crane.getObjectByName("wheelbase");
-    let firstWheel = ((CL-CaL*3) - WR*2) - 50; // litt magisk nummer :P
+    let firstWheel = ((VL-CaL*3) - WR*2) - 50; // litt magisk nummer :P
 
     let wheelPairPositions = [
         firstWheel, firstWheel - WR*2,
@@ -85,7 +89,7 @@ export function createCraneMesh(textureObjects) {
     wheelbase.add(platform)
     let platformTop = crane.getObjectByName("top")
 
-    let craneUnit = createCraneUnit(bodyMaterial, glassMaterial);
+    let craneUnit = createCraneMesh(MetalMaterial, bodyMaterial, glassMaterial);
     craneUnit.position.y = 10
     craneUnit.position.x = firstWheel - (WR*2)*4
 
@@ -96,12 +100,14 @@ export function createCraneMesh(textureObjects) {
     return crane
 }
 
-function createCraneUnit(bodyMat, glassMat) {
+function createCraneMesh(metalMat, bodyMat, glassMat) {
     let crane = new THREE.Group();
 
     const CPH = 10;
+    const baseW = CW + 30;
+    const hookW = 60;
 
-    let gCranePlatform = new THREE.BoxGeometry(CW, CPH, CW);
+    let gCranePlatform = new THREE.BoxGeometry(VW, CPH, VW);
     let cranePlatform = new THREE.Mesh(gCranePlatform, bodyMat);
     cranePlatform.castShadow = true;
     crane.add(cranePlatform);
@@ -109,8 +115,34 @@ function createCraneUnit(bodyMat, glassMat) {
     let craneCab = createCabMesh(bodyMat, glassMat);
     craneCab.position.y = CPH/2;
     craneCab.position.z -= CaH;
-    craneCab.position.x = (CaL) - CW/2;
+    craneCab.position.x = (CaL) - VW/2;
     cranePlatform.add(craneCab);
+
+    let gCraneBase = new THREE.BoxGeometry(baseW, baseW, baseW);
+    let craneBase = new THREE.Mesh(gCraneBase, bodyMat);
+    craneBase.castShadow = true;
+    craneBase.position.z = (VW/3) - baseW/2
+    craneBase.position.y = (VW/3) - baseW/2
+    craneBase.position.x = -((VW/2) - baseW/2)
+    cranePlatform.add(craneBase)
+
+    let gCraneArm = new THREE.BoxGeometry(CL, CW, CW);
+    let craneArm = new THREE.Mesh(gCraneArm, bodyMat);
+    craneArm.castShadow = true;
+    craneArm.name = "craneArm"
+    craneArm.position.x = CL/2
+    craneArm.position.y = 5
+    craneBase.add(craneArm)
+
+    let gCraneExtender = new THREE.BoxGeometry(CL + hookW, CW - 20, CW - 20);
+    let craneExtender = new THREE.Mesh(gCraneExtender, metalMat);
+    craneExtender.castShadow = true;
+    craneExtender.name = "craneExtender";
+    craneExtender.position.x += hookW/2
+
+    craneArm.add(craneExtender)
+    
+    
 
     return crane
 }
@@ -119,13 +151,13 @@ function createPlatformMesh(mat) {
     const platform = new THREE.Group();
     const topH = 10;
 
-    let gBody = new THREE.BoxGeometry(WB, BH, CW - WW*2);
+    let gBody = new THREE.BoxGeometry(WB, BH, VW - WW*2);
     let body = new THREE.Mesh(gBody, mat);
     body.castShadow = true;
     body.name = "body";
     platform.add(body);
 
-    let gTop= new THREE.BoxGeometry(WB, topH, CW);
+    let gTop= new THREE.BoxGeometry(WB, topH, VW);
     let top = new THREE.Mesh(gTop, mat);
     top.castShadow = true;
     top.name = "top"
@@ -179,13 +211,13 @@ function createOutriggerPair(mat) {
     const outriggerPair = new THREE.Group();
     let leftFoot = createOutriggerFoot(mat);
     leftFoot.name = "LeftFoot"
-    leftFoot.position.z -= CW - WW*2
+    leftFoot.position.z -= VW - WW*2
 
     outriggerPair.add(leftFoot)
 
     let rightFoot = createOutriggerFoot(mat);
     rightFoot.name = "RightFoot"
-    rightFoot.position.z += CW - WW*2
+    rightFoot.position.z += VW - WW*2
     rightFoot.rotateY(Math.PI)
 
     outriggerPair.add(rightFoot)
@@ -212,40 +244,15 @@ function createOutriggerFoot(mat) {
     return outriggerFoot
 }
 
-// function createWheelPairMesh(mat) {
-//     const wheelPair = new THREE.Group();
-
-//     let gWheel = new THREE.CylinderGeometry(WR, WR, WW, 20);
-//     let leftWheel = new THREE.Mesh(gWheel, mat);
-//     leftWheel.castShadow = true;
-//     leftWheel.name = "leftWheel";
-
-//     leftWheel.rotateX(Math.PI/2)
-//     leftWheel.position.z -= (CW - WW)/2
-//     wheelPair.add(leftWheel);
-
-//     let rightWheel = new THREE.Mesh(gWheel, mat);
-//     rightWheel.castShadow = true;
-//     rightWheel.name = "rightWheel";
-
-//     rightWheel.rotateX(Math.PI/2)
-//     rightWheel.position.z += (CW - WW)/2
-//     wheelPair.add(rightWheel)
-
-//     return wheelPair
-// }
-
 function createWheelPairMesh(sideTexture, frontTexture) {
     const wheelPair = new THREE.Group();
 
-    // Create the left wheel
     const leftWheel = createWheel(sideTexture, frontTexture);
-    leftWheel.position.z -= (CW - WW) / 2; // Adjust position for left wheel
+    leftWheel.position.z -= (VW - WW) / 2; 
     wheelPair.add(leftWheel);
 
-    // Create the right wheel
     const rightWheel = createWheel(sideTexture, frontTexture);
-    rightWheel.position.z += (CW - WW) / 2; // Adjust position for right wheel
+    rightWheel.position.z += (VW - WW) / 2; 
     wheelPair.add(rightWheel);
 
     return wheelPair;
@@ -254,14 +261,12 @@ function createWheelPairMesh(sideTexture, frontTexture) {
 function createWheel(sideMaterial, frontMaterial) {
     const wheelGroup = new THREE.Group();
     
-    // Create the cylinder for the sides
     const sideGeometry = new THREE.CylinderGeometry(WR, WR, WW, 20, 20, true);
     const sideCylinder = new THREE.Mesh(sideGeometry, sideMaterial);
     sideCylinder.castShadow = true;
     sideCylinder.name = "wheelSides";
-    sideCylinder.rotateX(Math.PI / 2); // Rotate to align with the ground
+    sideCylinder.rotateX(Math.PI / 2); 
 
-    // Create the front and back discs
     const frontGeometry = new THREE.CircleGeometry(WR, 20);
     const frontDisc = new THREE.Mesh(frontGeometry, frontMaterial);
     frontDisc.castShadow = true;
@@ -275,7 +280,6 @@ function createWheel(sideMaterial, frontMaterial) {
     backDisc.position.z = -(WW/2)
     backDisc.rotateY(Math.PI)
 
-
     wheelGroup.add(sideCylinder);
     wheelGroup.add(frontDisc);
     wheelGroup.add(backDisc);
@@ -287,21 +291,21 @@ function createWheel(sideMaterial, frontMaterial) {
 function createBaseMesh(mat) {
     const base = new THREE.Group();
 
-    let gB1 = new THREE.BoxGeometry(CL - WB, BH, CW);
+    let gB1 = new THREE.BoxGeometry(VL - WB, BH, VW);
     let B1 = new THREE.Mesh(gB1, mat)
     B1.castShadow = true;
     B1.name = "cabBase"
 
-    let gB2 = new THREE.BoxGeometry(WB, BH, CW - WW*2);
+    let gB2 = new THREE.BoxGeometry(WB, BH, VW - WW*2);
     let B2 = new THREE.Mesh(gB2, mat);
     B2.castShadow = true;
     B2.name = "wheelbase"
 
    
-    B2.position.x = - (CL / 2) + (WB / 2);
+    B2.position.x = - (VL / 2) + (WB / 2);
 
 
-    B1.position.x = B2.position.x + (WB / 2) + (CL - WB) / 2;
+    B1.position.x = B2.position.x + (WB / 2) + (VL - WB) / 2;
 
     base.add(B1);
     base.add(B2);
