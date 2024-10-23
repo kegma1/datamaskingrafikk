@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { ri } from "../script";
 
 export const VW = 300; // vehicle width
 export const BH = 50; // base height
@@ -177,9 +178,31 @@ function createCraneMesh(metalMat, bodyMat, glassMat) {
     hook.name = "hookPoint"
     hook.position.x = CL/2;
     craneExtender.add(hook)
+
+    addCamera(hook)
     
     crane.name = "crane"
     return crane
+}
+
+function addCamera(parent) { 
+    const POVCointainer = document.getElementById("pov");
+    const canvas = document.createElement("canvas");
+    POVCointainer.appendChild(canvas);
+    ri.pov = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
+
+    ri.pov.shadowMap.enabled = true; //NB!
+	ri.pov.shadowMapSoft = true;
+	ri.pov.shadowMap.type = THREE.PCFSoftShadowMap; //THREE.BasicShadowMap;
+
+    ri.POVCamera = new THREE.PerspectiveCamera(74, window.innerWidth / window.innerHeight, 0.1, 10000);
+    ri.POVCamera.position.x = 10;
+	ri.POVCamera.position.y = 0;
+	ri.POVCamera.position.z = 0;
+	ri.POVCamera.up = new THREE.Vector3(0, 1, 0);
+	let target = new THREE.Vector3(0.0, -50, 0.0);
+	ri.POVCamera.lookAt(target);
+    parent.add(ri.POVCamera)
 }
 
 function addHeadLights(cabBase) {
@@ -225,9 +248,7 @@ function createHookMesh(mat) {
     hookPoint.add(rope)
 
     hookPoint.updateRope = () => {
-        let hookPointPos = hookPoint.position;
-        let hookPos = hook.position;
-        rope.geometry.setFromPoints([new THREE.Vector3(), hookPos.clone()])
+        rope.geometry.setFromPoints([new THREE.Vector3(), hook.position.clone()])
     }
 
     return hookPoint;

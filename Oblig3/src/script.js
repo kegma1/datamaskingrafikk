@@ -18,7 +18,7 @@ import nz from '../static/GardenNook/nz.png';
 
 const speedometer = document.getElementById("speed");
 
-const ri = {
+export const ri = {
     currentlyPressedKeys: []
 }
 
@@ -180,6 +180,7 @@ function animate(currentTime) {
 
 function renderScene() {
     ri.renderer.render(ri.scene, ri.camera);
+    ri.pov.render(ri.scene, ri.POVCamera);
 }
 
 function handleKeys(delta, crane, arm, armExtender, outriggers, wheels, hookPoint, hook) {

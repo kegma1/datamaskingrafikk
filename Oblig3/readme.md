@@ -35,4 +35,4 @@ npm run build
 - [x] Bruk minst to lyskilder til å belyse scenen.
 - [x] Bruk TrackballControls slik at man kan rotere og zoome hele scenen.
 - [x] Få med forklarende tekst på html-siden som indikerer hvilke taster som gjør hva.
-- [ ] Valgfritt: Plasser et kamera i toppen av kranen som alltid peker ned mot kroken, dvs. rett ned, slik at føreren hele tiden ser kroken (forstørret). Det som dette kameraet ser skal vises i et eget vindu/canvas. Se tips her Vise førstepersonskamera i eget vindu.
+- [x] Valgfritt: Plasser et kamera i toppen av kranen som alltid peker ned mot kroken, dvs. rett ned, slik at føreren hele tiden ser kroken (forstørret). Det som dette kameraet ser skal vises i et eget vindu/canvas. Se tips her Vise førstepersonskamera i eget vindu.
