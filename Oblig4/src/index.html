@@ -7,7 +7,16 @@
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-    <h2>Startprosjekt, three.js</h2>
+    <div class="ui">
+      <p>score: 0000</p>
+      <div id="loading">
+          <div>
+              <div>...loading...</div>
+              <div class="progress"><div id="progressbar"></div></div>
+          </div>
+      </div>
+    </div>
+
     <script type="module">
 		import {main} from "./script.js";
 		main();
