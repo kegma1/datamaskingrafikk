@@ -1,25 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Startprosjekt, three.js</title>
-    <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-    <div class="ui">
-      <p>score: 0000</p>
-      <div id="loading">
-          <div>
-              <div>...loading...</div>
-              <div class="progress"><div id="progressbar"></div></div>
-          </div>
-      </div>
-    </div>
 
-    <script type="module">
-		import {main} from "./script.js";
+<html>
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
+    <title>Flipper, start</title>
+</head>
+<div style="top:10px; left:15px; width:100%; text-align:left; color:black;" class="ui">
+    <h1>Flipper, start</h1>
+    <button onclick="history.back()">Tilbake</button>
+    <div>
+        <br>
+        VB => styrer venstre flipper.<br>
+        NM => styrer høyre flipper.<br><br>
+        <br>
+        <input style="width: 120px" type="button" id="btnNewGame" value="Nytt spill">
+        <input style="width: 120px" type="button" id="btnShoot" value="Skyt!">
+        <h4>Poeng</h4>
+        <span id="points">--</span><br>
+    </div>
+</div>
+<body>
+<script src="./lib/ammo/ammo.js"></script>
+<script type="module">
+	import {main} from "./script.js";
+	Ammo().then(async function (AmmoLib) {
+		Ammo = AmmoLib;
 		main();
-    </script>
+	});
+</script>
 </body>
 </html>
