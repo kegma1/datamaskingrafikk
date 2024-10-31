@@ -38,7 +38,7 @@ export function pushBall(mesh, velocity) {
 		return;
 
 	let relativeVector = new Ammo.btVector3(0, 0, 0);
-	let impulseVector = new Ammo.btVector3(velocity.x * 0.05, velocity.y * 0.05, velocity.z * 0.05);
+	let impulseVector = new Ammo.btVector3(velocity.x * 0.005, velocity.y * 0.005, velocity.z * 0.005);
 
 	const rigidBody = mesh.userData.physicsBody;
 	rigidBody.activate(true);

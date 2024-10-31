@@ -9,6 +9,7 @@ import {
 import {addMeshToScene} from "./myThreeHelper.js";
 import {createFlipperArm} from "./armHingeConstraint.js";
 import {createSphere} from "./sphere.js";
+import {ri} from "./script.js";
 
 let wallHeight = 0.5;
 let floorSize = {width: 3.4, height: 0.1, depth: 7.5};
@@ -40,7 +41,7 @@ export function createPinballGame(textureObjects, angle) {
 	let point1 = (floorSize.width / 2) - (.05*4 + deviderWidth)
 	let point2 = ((floorSize.width / 2) + (deviderWidth/2));
 
-	addSpring(angle, {x:(point1 + point2)/2, y:0, z:floorSize.depth/2});
+	addSpring(angle, {x:(point1 + point2)/2, y:0, z:(floorSize.depth/2) - (wallHeight/2)}); 
 }
 
 function addSpring(angle, position) {
@@ -68,6 +69,29 @@ function addSpring(angle, position) {
 	addMeshToScene(mesh);
 	phy.rigidBodies.push(mesh);
 	rigidBody.threeMesh = mesh;
+
+	let button = document.getElementById("btnShoot")
+
+	button.addEventListener("mousedown", () => {
+		ri.isShooting = true; 
+	})
+	button.addEventListener("mouseup", () => {
+		ri.isShooting = false
+		applyForceToSphere();
+	})
+}
+
+function applyForceToSphere() {
+    // Find the sphere mesh
+    const sphereMesh = ri.scene.getObjectByName("sphere");
+	console.log(sphereMesh)
+    if (sphereMesh) {
+        const sphereBody = sphereMesh.userData.physicsBody;
+
+        // Apply force to the sphere in the direction of the spring's velocity
+        const force = new Ammo.btVector3(ri.springVelocity.x, ri.springVelocity.y, ri.springVelocity.z);
+        sphereBody.applyCentralImpulse(force);
+    }
 }
 
 /**

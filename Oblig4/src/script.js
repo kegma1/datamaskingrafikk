@@ -24,7 +24,8 @@ export const ri = {
 	camera: undefined,
 	clock: undefined,
 	controls: undefined,
-	lilGui: undefined
+	lilGui: undefined,
+	springVelocity: new THREE.Vector3(0, 0, 0)
 };
 
 export function main() {
@@ -96,7 +97,15 @@ function animate(currentTime, myThreeScene, myAmmoPhysicsWorld) {
 	window.requestAnimationFrame((currentTime) => {
 		animate(currentTime, myThreeScene, myAmmoPhysicsWorld);
 	});
-	let deltaTime = ri.clock.getDelta();
+	let deltaTime = ri.clock.getDelta();	
+
+	if (ri.isShooting) {
+        // Increase the velocity (for example, with a simple linear increase)
+        ri.springVelocity.z += 0.1; // Increase in the z-direction, adjust this value as needed
+    } else {
+        // Optionally, you can reset or dampen the velocity when not shooting
+        ri.springVelocity.multiplyScalar(0.9); // Dampen the velocity
+    }
 
 	//Oppdaterer grafikken:
 	updateThree(deltaTime);
