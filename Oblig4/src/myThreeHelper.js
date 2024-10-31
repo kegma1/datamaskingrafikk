@@ -56,7 +56,7 @@ export function createThreeScene() {
 
 export function addLights() {
 	// Ambient:
-	let ambientLight1 = new THREE.AmbientLight(0xffffff, 0.7);
+	let ambientLight1 = new THREE.AmbientLight(0xffffff, 0.5);
 	ambientLight1.visible = true;
 	ri.scene.add(ambientLight1);
 	const ambientFolder = ri.lilGui.addFolder( 'Ambient Light' );
@@ -65,7 +65,7 @@ export function addLights() {
 	ambientFolder.addColor(ambientLight1, 'color').name("Color");
 
 	//** RETNINGSORIENTERT LYS (som gir skygge):
-	let directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+	let directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 	directionalLight.visible = true;
 	ri.scene.add(directionalLight);
 	directionalLight.position.set(0, 20, 0);
@@ -82,7 +82,7 @@ export function addLights() {
 	ri.scene.add(directionalLight);
 
 	//** POINTLIGHT:
-	let pointLight = new THREE.PointLight(0xffffff, 1000);
+	let pointLight = new THREE.PointLight(0xffffff, 500);
 	pointLight.visible = true;
 	pointLight.position.set(0, 15, 0);
 	pointLight.shadow.camera.near = 10;
@@ -115,19 +115,19 @@ export function handleKeys(delta) {
 		);
 	}
 
-	const leftArmMesh = ri.scene.getObjectByName("left_hinge_arm");
-	let leftArmDirection = new THREE.Vector3();
-	leftArmMesh.getWorldDirection(leftArmDirection);  // NB! worldDIRECTION! Gir en vektor som peker mot +Z. FRA DOC: Returns a vector representing the direction of object's positive z-axis in world space.
-	let leftArmOppositeDirection = new THREE.Vector3();
-	leftArmMesh.getWorldDirection(leftArmOppositeDirection).multiplyScalar(-1);
+	// const leftArmMesh = ri.scene.getObjectByName("left_hinge_arm");
+	// let leftArmDirection = new THREE.Vector3();
+	// leftArmMesh.getWorldDirection(leftArmDirection);  // NB! worldDIRECTION! Gir en vektor som peker mot +Z. FRA DOC: Returns a vector representing the direction of object's positive z-axis in world space.
+	// let leftArmOppositeDirection = new THREE.Vector3();
+	// leftArmMesh.getWorldDirection(leftArmOppositeDirection).multiplyScalar(-1);
 
-	// Gir flipperen et støt:
-	if (ri.currentlyPressedKeys['KeyV']) {
-		pushFlipper(leftArmMesh, leftArmOppositeDirection, true);
-	}
-	if (ri.currentlyPressedKeys['KeyB']) {
-		pushFlipper(leftArmMesh, leftArmDirection, true);
-	}
+	// // Gir flipperen et støt:
+	// if (ri.currentlyPressedKeys['KeyV']) {
+	// 	pushFlipper(leftArmMesh, leftArmOppositeDirection, true);
+	// }
+	// if (ri.currentlyPressedKeys['KeyB']) {
+	// 	pushFlipper(leftArmMesh, leftArmDirection, true);
+	// }
 }
 
 export function updateThree(deltaTime) {

@@ -6,6 +6,15 @@ import {createPinballGame} from "./pinballGame.js";
 
 import brickTexture from "../static/bricks2.jpg";
 import metalTexture from "../static/metal_tread_plate1.jpg";
+import dolphinTexture from "../static/dolphin.jpg"
+
+import px from '../static/GardenNook/px.png';
+import nx from '../static/GardenNook/nx.png';
+import py from '../static/GardenNook/py.png';
+import ny from '../static/GardenNook/ny.png';
+import pz from '../static/GardenNook/pz.png';
+import nz from '../static/GardenNook/nz.png';
+
 
 //MERK: Denne brukes også i myThreeHelper:
 export const ri = {
@@ -54,9 +63,12 @@ function handleKeyDown(event) {
 function addAmmoSceneObjects() {
 	const loadingManager = new THREE.LoadingManager();
 	const textureLoader = new THREE.TextureLoader(loadingManager);
+	const cubeTextureLoader = new THREE.CubeTextureLoader(loadingManager);
 	const textureObjects = [];
 	textureObjects[0] = textureLoader.load(metalTexture);
 	textureObjects[1] = textureLoader.load(brickTexture);
+	textureObjects[2] = textureLoader.load(dolphinTexture);
+	textureObjects[3] = cubeTextureLoader.load([px, nx, py, ny, pz, nz])
 
 	loadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
 		console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
