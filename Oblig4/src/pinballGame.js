@@ -8,6 +8,7 @@ import {
 } from "./myAmmoHelper.js";
 import {addMeshToScene} from "./myThreeHelper.js";
 import {createFlipperArm} from "./armHingeConstraint.js";
+import {createSphere} from "./sphere.js";
 
 /**
  * Oppretter hele spillet.
@@ -21,13 +22,15 @@ export function createPinballGame(textureObjects, angle) {
 	const position={x:0, y:0, z:0}
 	createBoard(textureObjects[1], textureObjects[2], textureObjects[3], position, angle);
 
-	// let flipperSize = {width: 1.1, height: 0.1, depth:0.1}	;
+	let flipperSize = {width: 0.7, height: 0.3, depth:0.1}	;
 
-	// //Flipper1:
-	// let position1 = {x: -1.3, y: 0, z: 2.0};	//I forhold til at brettet står i posisjon 0,0,0
-	// createFlipperArm( 1, 0x00FF00, position1, true, "left_hinge_arm", angle, flipperSize);
-	// //Flipper2:
-	// //...
+	//Flipper1:
+	let position1 = {x: -0.9, y: 0, z: 2.5};	//I forhold til at brettet står i posisjon 0,0,0
+	createFlipperArm( 1, 0x00FF00, position1, true, "left_hinge_arm", angle, flipperSize);
+	//Flipper2:
+	let position2 = {x: 0.63, y: 0, z: 2.5};	//I forhold til at brettet står i posisjon 0,0,0
+	createFlipperArm( 1, 0x00FF00, position2, false, "right_hinge_arm", angle, flipperSize);
+
 
 	// addBumpers(angle);
 }
@@ -44,14 +47,17 @@ export function createBoard(textureObject, floorTexture, envMap, position, angle
 	const mass = 0;
 
 	let floorSize = {width: 3.4, height: 0.1, depth: 7.5};
-	let wallHeight = 1.5;
+	let wallHeight = 0.5;
+	let deviderWidth = 0.05;
 	
+	// THREE
 	const groupMesh = new THREE.Group();
 	
 	const gFloor = new THREE.BoxGeometry(floorSize.width, floorSize.height, floorSize.depth)
 	const floor = new THREE.Mesh(gFloor, floorMat)
 	floor.name = "floor"
 	floor.position.set(position.x, position.y - wallHeight/2, position.z)
+	floor.receiveShadow = true;
 	groupMesh.add(floor)
 
 	const gWindow = new THREE.BoxGeometry(floorSize.width, floorSize.height, floorSize.depth) 
@@ -60,11 +66,46 @@ export function createBoard(textureObject, floorTexture, envMap, position, angle
 	window.position.set(position.x, position.y + wallHeight/2, position.z);
 	groupMesh.add(window);
 
-	const walls = createWalls(wallMat, floorSize, wallHeight);
+	const walls = createWalls(wallMat, floorSize, wallHeight, deviderWidth);
 	groupMesh.add(walls);
+
+	const gArc = new THREE.CylinderGeometry(floorSize.width/2, floorSize.width/2, wallHeight, 30, undefined, true, Math.PI/2, Math.PI);
+	const arc = new THREE.Mesh(gArc, wallMat);
+	arc.name = "arc";
+	arc.position.z -= floorSize.depth/2 - floorSize.width/2
+	arc.castShadow = true;
+	
+	groupMesh.add(arc)
+
+	const gDevider = new THREE.BoxGeometry(deviderWidth, wallHeight, (floorSize.depth/3)*2)
+	const devider = new THREE.Mesh(gDevider, wallMat);
+	devider.name = "devider";
+	devider.position.set(floorSize.width/2 - (.05*4 + deviderWidth), 0, ((floorSize.depth/3)*2)/4);
+	devider.castShadow = true;
+	
+	groupMesh.add(devider)
+
+	const gFunnelWall = new THREE.BoxGeometry(deviderWidth, wallHeight, (floorSize.depth/3))
+	const leftFunnel = new THREE.Mesh(gFunnelWall, wallMat)
+	leftFunnel.name = "leftFunnel"
+	leftFunnel.rotateY(Math.PI/10)
+	leftFunnel.position.set(-((floorSize.depth/3)/2) - deviderWidth*2+0.01, 0, (floorSize.depth/3)/2)
+	leftFunnel.castShadow = true;
+	
+	groupMesh.add(leftFunnel)
+
+	const rightFunnel = new THREE.Mesh(gFunnelWall, wallMat)
+	rightFunnel.name = "rightFunnel"
+	rightFunnel.rotateY(-Math.PI/10)
+	rightFunnel.position.set(((floorSize.depth/3)/2) - deviderWidth*4+0.01, 0, (floorSize.depth/3)/2)
+	rightFunnel.castShadow = true;
+	
+	groupMesh.add(rightFunnel)
 
 	groupMesh.rotateX(angle);
 
+
+	// AMMO
 	const compoundShape = new Ammo.btCompoundShape();
 
 	const floorShape = new Ammo.btBoxShape(
@@ -83,9 +124,44 @@ export function createBoard(textureObject, floorTexture, envMap, position, angle
 	windowTransform.setOrigin(new Ammo.btVector3(position.x, position.y + wallHeight / 2, position.z));
 	compoundShape.addChildShape(windowTransform, windowShape);
 
+	const arcShape = createHalfCylinderCollision(arc)
+	compoundShape.addChildShape(...arcShape);
+
+	const deviderShape = new Ammo.btBoxShape(
+		new Ammo.btVector3(deviderWidth / 2, wallHeight / 2, ((floorSize.depth/3)*2)/2)
+	);
+	const deviderTransform = new Ammo.btTransform();
+	deviderTransform.setIdentity();
+	deviderTransform.setOrigin(new Ammo.btVector3(floorSize.width/2 - (.05*4 + deviderWidth), 0, ((floorSize.depth/3)*2)/4))
+	compoundShape.addChildShape(deviderTransform, deviderShape)
+
+	const funnelWallShape = new Ammo.btBoxShape(
+		new Ammo.btVector3(deviderWidth / 2, wallHeight / 2, (floorSize.depth/3)/2)
+	);
+	const leftWallTransform = new Ammo.btTransform();
+	leftWallTransform.setIdentity();
+	leftWallTransform.setOrigin(new Ammo.btVector3(-((floorSize.depth/3)/2) - deviderWidth*2+0.01, 0, (floorSize.depth/3)/2))
+
+	const leftWallRotation = new Ammo.btQuaternion();
+	leftWallRotation.setEulerZYX(0, Math.PI / 10, 0); 
+	leftWallTransform.setRotation(leftWallRotation);
+
+	compoundShape.addChildShape(leftWallTransform, funnelWallShape);
+
+	const rightWallTransform = new Ammo.btTransform();
+	rightWallTransform.setIdentity();
+	rightWallTransform.setOrigin(new Ammo.btVector3(((floorSize.depth/3)/2) - deviderWidth*4+0.01, 0, (floorSize.depth/3)/2))
+
+	const rightWallRotation = new Ammo.btQuaternion();
+	rightWallRotation.setEulerZYX(0, -Math.PI / 10, 0);
+	rightWallTransform.setRotation(rightWallRotation);
+
+	compoundShape.addChildShape(rightWallTransform, funnelWallShape);
+
 	addWallsCollition(floorSize, wallHeight, position, compoundShape);
 
-
+	// MISC
+	createSphere(.05, 0x0eFF09, {x:floorSize.width/2 - .05*2, y:.1, z:.2})
 	let rigidBody = createAmmoRigidBody(compoundShape, groupMesh, 0.2, 0.9, position, mass);
 	groupMesh.userData.physicsBody = rigidBody;
 	// Legger til physics world:
@@ -95,32 +171,72 @@ export function createBoard(textureObject, floorTexture, envMap, position, angle
 	rigidBody.threeMesh = groupMesh;
 }
 
-function createWalls(mat, floorSize, wallHeight) {
+function createHalfCylinderCollision(threeMesh) {
+    const geometry = threeMesh.geometry;
+
+    const halfCylinderMesh = new Ammo.btTriangleMesh();
+
+    const positionAttribute = geometry.getAttribute('position');
+    const indexAttribute = geometry.index;
+
+    const vertices = [];
+    for (let i = 0; i < positionAttribute.count; i++) {
+        const x = positionAttribute.getX(i);
+        const y = positionAttribute.getY(i);
+        const z = positionAttribute.getZ(i);
+        vertices.push(new Ammo.btVector3(x, y, z));
+    }
+
+    if (indexAttribute) {
+        for (let i = 0; i < indexAttribute.count; i += 3) {
+            const a = indexAttribute.getX(i);
+            const b = indexAttribute.getX(i + 1);
+            const c = indexAttribute.getX(i + 2);
+            halfCylinderMesh.addTriangle(vertices[a], vertices[b], vertices[c]);
+        }
+    } else {
+        for (let i = 0; i < vertices.length; i += 3) {
+            if (i + 2 < vertices.length) {
+                halfCylinderMesh.addTriangle(vertices[i], vertices[i + 1], vertices[i + 2]);
+            }
+        }
+    }
+
+    const halfCylinderShape = new Ammo.btBvhTriangleMeshShape(halfCylinderMesh, true);
+
+    const halfCylinderTransform = new Ammo.btTransform();
+    halfCylinderTransform.setIdentity();
+    halfCylinderTransform.setOrigin(new Ammo.btVector3(threeMesh.position.x, threeMesh.position.y, threeMesh.position.z));
+
+    return [halfCylinderTransform, halfCylinderShape];
+}
+
+function createWalls(mat, floorSize, wallHeight, wallWidth) {
 	const walls = new THREE.Group()
 	walls.name = walls
 
 	const gWalls = [
-		new THREE.PlaneGeometry(floorSize.depth, wallHeight), // Left and Right wall
-		new THREE.PlaneGeometry(floorSize.width, wallHeight), // Top and Bottom wall
+		new THREE.BoxGeometry(floorSize.depth, wallHeight, wallWidth), // Left and Right wall
+		new THREE.BoxGeometry(floorSize.width, wallHeight, wallWidth), // Top and Bottom wall
 	]
 
 	const leftWall = new THREE.Mesh(gWalls[0], mat);
 	leftWall.name = "leftWall";
-	leftWall.position.x -= floorSize.width/2 + 0.0001;
+	leftWall.position.x -= floorSize.width/2 + wallWidth/2;
 	leftWall.rotateY(Math.PI/2);
 	walls.add(leftWall);
 	const rightWall = new THREE.Mesh(gWalls[0], mat);
 	rightWall.name = "rightWall";
-	rightWall.position.x += floorSize.width/2 + 0.0001;
+	rightWall.position.x += floorSize.width/2 + wallWidth/2;
 	rightWall.rotateY(Math.PI/2);
 	walls.add(rightWall)
 	const topWall = new THREE.Mesh(gWalls[1], mat);
 	topWall.name = "topWall";
-	topWall.position.z -= floorSize.depth/2 + 0.0001;
+	topWall.position.z -= floorSize.depth/2 + wallWidth/2;
 	walls.add(topWall)
 	const bottomWall = new THREE.Mesh(gWalls[1], mat);
 	bottomWall.name = "bottomWall";
-	bottomWall.position.z += floorSize.depth/2 + 0.0001;
+	bottomWall.position.z += floorSize.depth/2 + wallWidth/2;
 	walls.add(bottomWall)
 	
 	return walls

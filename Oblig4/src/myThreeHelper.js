@@ -115,19 +115,33 @@ export function handleKeys(delta) {
 		);
 	}
 
-	// const leftArmMesh = ri.scene.getObjectByName("left_hinge_arm");
-	// let leftArmDirection = new THREE.Vector3();
-	// leftArmMesh.getWorldDirection(leftArmDirection);  // NB! worldDIRECTION! Gir en vektor som peker mot +Z. FRA DOC: Returns a vector representing the direction of object's positive z-axis in world space.
-	// let leftArmOppositeDirection = new THREE.Vector3();
-	// leftArmMesh.getWorldDirection(leftArmOppositeDirection).multiplyScalar(-1);
+	const leftArmMesh = ri.scene.getObjectByName("left_hinge_arm");
+	let leftArmDirection = new THREE.Vector3();
+	leftArmMesh.getWorldDirection(leftArmDirection);  // NB! worldDIRECTION! Gir en vektor som peker mot +Z. FRA DOC: Returns a vector representing the direction of object's positive z-axis in world space.
+	let leftArmOppositeDirection = new THREE.Vector3();
+	leftArmMesh.getWorldDirection(leftArmOppositeDirection).multiplyScalar(-1);
 
-	// // Gir flipperen et støt:
-	// if (ri.currentlyPressedKeys['KeyV']) {
-	// 	pushFlipper(leftArmMesh, leftArmOppositeDirection, true);
-	// }
-	// if (ri.currentlyPressedKeys['KeyB']) {
-	// 	pushFlipper(leftArmMesh, leftArmDirection, true);
-	// }
+	const rightArmMesh = ri.scene.getObjectByName("right_hinge_arm");
+	let rightArmDirection = new THREE.Vector3();
+	rightArmMesh.getWorldDirection(rightArmDirection);  // NB! worldDIRECTION! Gir en vektor som peker mot +Z. FRA DOC: Returns a vector representing the direction of object's positive z-axis in world space.
+	let rightArmOppositeDirection = new THREE.Vector3();
+	rightArmMesh.getWorldDirection(rightArmOppositeDirection).multiplyScalar(-1);
+
+	// Gir flipperen et støt:
+	if (ri.currentlyPressedKeys['KeyV']) {
+		pushFlipper(leftArmMesh, leftArmOppositeDirection, true);
+	}
+	if (ri.currentlyPressedKeys['KeyB']) {
+		pushFlipper(leftArmMesh, leftArmDirection, true);
+	}
+
+	// Gir flipperen et støt:
+	if (ri.currentlyPressedKeys['KeyN']) {
+		pushFlipper(rightArmMesh, rightArmDirection, false);
+	}
+	if (ri.currentlyPressedKeys['KeyM']) {
+		pushFlipper(rightArmMesh, rightArmOppositeDirection, false);
+	}
 }
 
 export function updateThree(deltaTime) {

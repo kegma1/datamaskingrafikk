@@ -10,14 +10,14 @@ import {
 
 export function createFlipperArm(mass , color, position, leftHinged, name, angle, size){
 	//Justerer høyden til flipperen i forhold til planet:
-	position.y = -Math.tan(angle) * position.z;
+	position.y = -Math.tan(angle) * position.z - 0.06;
 
 	//Flipperarm:
 	const rigidBodyArm = createArm(mass, position, name, angle, size);
 	const armLength = rigidBodyArm.threeMesh.geometry.parameters.width;
 
 	//Flipperhengsel:
-	const radius = size.height;
+	const radius = size.depth;
 	const rigidBodyAnchor = createAnchor(position, radius, angle);
 
 	//AMMO hengsel/hinge constraint:
@@ -109,7 +109,7 @@ function createArm(mass, position, name, angle, size) {
 	mesh.userData.physicsBody = rigidBody;
 
 	// Legger til physics world:
-	phy.ammoPhysicsWorld.addRigidBody();
+	phy.ammoPhysicsWorld.addRigidBody(rigidBody);
 
 	addMeshToScene(mesh);
 	phy.rigidBodies.push(mesh);
