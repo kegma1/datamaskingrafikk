@@ -10,6 +10,9 @@ import {addMeshToScene} from "./myThreeHelper.js";
 import {createFlipperArm} from "./armHingeConstraint.js";
 import {createSphere} from "./sphere.js";
 
+let wallHeight = 0.5;
+let floorSize = {width: 3.4, height: 0.1, depth: 7.5};
+let deviderWidth = 0.05;
 /**
  * Oppretter hele spillet.
  * Merk størrelser; anta at en enhet er en meter, dvs. flipperSize = {with=1.1, ...} betyr at bredde på flipperen er
@@ -32,7 +35,39 @@ export function createPinballGame(textureObjects, angle) {
 	createFlipperArm( 1, 0x00FF00, position2, false, "right_hinge_arm", angle, flipperSize);
 
 
-	// addBumpers(angle);
+	addBumpers(angle);
+
+	let point1 = (floorSize.width / 2) - (.05*4 + deviderWidth)
+	let point2 = ((floorSize.width / 2) + (deviderWidth/2));
+
+	addSpring(angle, {x:(point1 + point2)/2, y:0, z:floorSize.depth/2});
+}
+
+function addSpring(angle, position) {
+	position.y = -Math.tan(angle) * position.z;
+
+	const gMesh = new THREE.CylinderGeometry(0.1, 0.1, wallHeight, 30);
+	
+	
+	const mat = new THREE.MeshStandardMaterial();
+	const mesh = new THREE.Mesh(gMesh, mat);
+	mesh.name = "spring";
+	mesh.castShadow = true;
+	mesh.receiveShadow = true;
+	mesh.rotateX(angle)
+	mesh.rotateX(Math.PI/2)
+	mesh.position.set(position.x, position.y, position.z);
+
+	// AMMO
+	const shape = new Ammo.btCylinderShape(new Ammo.btVector3(0.1, wallHeight/2, 0.1));
+
+	let rigidBody = createAmmoRigidBody(shape, mesh, 0.2, 0.1, position, 0);
+	mesh.userData.physicsBody = rigidBody;
+	// Legger til physics world:
+	phy.ammoPhysicsWorld.addRigidBody(rigidBody);
+	addMeshToScene(mesh);
+	phy.rigidBodies.push(mesh);
+	rigidBody.threeMesh = mesh;
 }
 
 /**
@@ -46,10 +81,6 @@ export function createBoard(textureObject, floorTexture, envMap, position, angle
 	//Brettet skal stå i ro:
 	const mass = 0;
 
-	let floorSize = {width: 3.4, height: 0.1, depth: 7.5};
-	let wallHeight = 0.5;
-	let deviderWidth = 0.05;
-	
 	// THREE
 	const groupMesh = new THREE.Group();
 	
@@ -161,7 +192,11 @@ export function createBoard(textureObject, floorTexture, envMap, position, angle
 	addWallsCollition(floorSize, wallHeight, position, compoundShape);
 
 	// MISC
-	createSphere(.05, 0x0eFF09, {x:floorSize.width/2 - .05*2, y:.1, z:.2})
+
+	let point1 = (floorSize.width / 2) - (.05*4 + deviderWidth)
+	let point2 = ((floorSize.width / 2) + (deviderWidth/2));
+
+	createSphere(.05, 0x0eFF09, {x:(point1 + point2)/2, y:.1, z:.2})
 	let rigidBody = createAmmoRigidBody(compoundShape, groupMesh, 0.2, 0.9, position, mass);
 	groupMesh.userData.physicsBody = rigidBody;
 	// Legger til physics world:
@@ -271,19 +306,101 @@ function addWallsCollition(floorSize, wallHeight, position, compoundShape) {
 	compoundShape.addChildShape(wallTransforms[3], bottomWallShape);
 }
 
+function isValidNumber(str) {
+    return !isNaN(parseFloat(str)) && isFinite(str);
+}
+
 /**
  * Legger til bumpers. Må ha et navn (.name) som starter med 'bumper'.
  * Dette henger sammen med kollisjonshåndteringen. Se myAmmoHelper.js og checkCollisions-funksjonen.
  */
 function addBumpers(angle) {
-	//...
+	addBumper(angle, 0.35, {x: 1, y: 0, z: -1}, "bumper", 50)
+	addBumper(angle, 0.35, {x: -0.5, y: 0, z: 1}, "bumper", 50)
+	addBumper(angle, 0.2, {x: -1, y: 0, z: -0.5}, "bumper", 100)
+	addBumper(angle, 0.2, {x: 0.5, y: 0, z: 1.3}, "bumper", 100)
+	addBumper(angle, 0.15, {x: 0, y: 0, z: -2}, "bumper", 200)
 }
 
 /**
  * Legger til en bumper. Bumperen er en sylinder med radiusTop, radiusBottom og height.
  */
 function addBumper(angle, size, position, name, points) {
-	// ...
-	// Sørg for "fysikk" på denne.
-	// Tips: Bruk createAmmoRigidBody(...)
+	position.y = -Math.tan(angle) * position.z;
+
+	let color = {R:Math.floor(Math.random() * 256), G:Math.floor(Math.random() * 256), B:Math.floor(Math.random() * 256)}
+
+	// THREE
+	const canvas = document.createElement("canvas");
+	canvas.width = 256;
+	canvas.height = 256;
+	const context = canvas.getContext("2d");
+	
+	drawText(context, canvas, color, points);
+
+	const textTexture = new THREE.CanvasTexture(canvas);
+
+	const gMesh = new THREE.CylinderGeometry(size, size, wallHeight, 30);
+	
+	const topMat = new THREE.MeshStandardMaterial({map: textTexture});
+	const sideMat = new THREE.MeshStandardMaterial({color: (color.R << 16) | (color.G << 8) | color.B});
+	const mesh = new THREE.Mesh(gMesh, [sideMat, topMat]);
+	mesh.name = name;
+	mesh.castShadow = true;
+	mesh.receiveShadow = true;
+	mesh.rotateX(angle)
+	mesh.rotateY(Math.PI/2)
+	mesh.position.set(position.x, position.y, position.z);
+	mesh.color = color
+	mesh.textCtx = context 
+	mesh.textCanvas = canvas
+
+	mesh.collisionResponse = (mesh1) => {
+		mesh1.color = {R:Math.floor(Math.random() * 256), G:Math.floor(Math.random() * 256), B:Math.floor(Math.random() * 256)}
+		mesh1.material[0].color.setHex((mesh1.color.R << 16) | (mesh1.color.G << 8) | mesh1.color.B);
+
+		drawText(mesh1.textCtx, mesh1.textCanvas, mesh1.color, points)
+		mesh1.material[1].map = new THREE.CanvasTexture(mesh1.textCanvas);
+
+		let pointCounter = document.getElementById("points")
+
+		let currentPoints = pointCounter.innerText;
+		if (isValidNumber(currentPoints)) {
+			pointCounter.innerText = Number(currentPoints) + points
+		} else {
+			pointCounter.innerText = points
+		}
+
+	};
+	
+
+	// AMMO
+	const shape = new Ammo.btCylinderShape(new Ammo.btVector3(size, wallHeight/2, size));
+
+	let rigidBody = createAmmoRigidBody(shape, mesh, 0.2, 0.1, position, 0);
+	mesh.userData.physicsBody = rigidBody;
+	// Legger til physics world:
+	phy.ammoPhysicsWorld.addRigidBody(rigidBody);
+	addMeshToScene(mesh);
+	phy.rigidBodies.push(mesh);
+	rigidBody.threeMesh = mesh;
+}
+
+function drawText(context, canvas, color, points) {
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.fillStyle = `RGB(${color.R} ${color.G} ${color.B})`;
+	context.fillRect(0, 0, canvas.width, canvas.height)
+
+	
+	context.fillStyle = "white";
+	context.font = "bold 100px Arial";
+	context.textAlign = "center";
+	context.textBaseline = "middle";
+	
+	context.lineWidth = 8;            
+	context.strokeStyle = "black";  
+
+	context.strokeText(points, canvas.width / 2, canvas.height / 2);  
+	context.fillText(points, canvas.width / 2, canvas.height / 2);    
+
 }
