@@ -2,7 +2,7 @@ import '../../style.css';
 import * as THREE from "three";
 import { createThreeScene, handleKeys, onWindowResize, renderScene,	updateThree} from "./myThreeHelper.js";
 import { createAmmoWorld, updatePhysics } from "./myAmmoHelper.js";
-import {createPinballGame} from "./pinballGame.js";
+import {createPinballGame, resetGame} from "./pinballGame.js";
 
 import brickTexture from "../static/bricks2.jpg";
 import metalTexture from "../static/metal_tread_plate1.jpg";
@@ -25,7 +25,8 @@ export const ri = {
 	clock: undefined,
 	controls: undefined,
 	lilGui: undefined,
-	springVelocity: new THREE.Vector3(0, 0, 0)
+	springVelocity: new THREE.Vector3(0, 0, -100),
+	hasShoot: false
 };
 
 export function main() {
@@ -97,16 +98,12 @@ function animate(currentTime, myThreeScene, myAmmoPhysicsWorld) {
 	window.requestAnimationFrame((currentTime) => {
 		animate(currentTime, myThreeScene, myAmmoPhysicsWorld);
 	});
-	let deltaTime = ri.clock.getDelta();	
+	let deltaTime = ri.clock.getDelta();
 
-	if (ri.isShooting) {
-        // Increase the velocity (for example, with a simple linear increase)
-        ri.springVelocity.z += 0.1; // Increase in the z-direction, adjust this value as needed
-    } else {
-        // Optionally, you can reset or dampen the velocity when not shooting
-        ri.springVelocity.multiplyScalar(0.9); // Dampen the velocity
-    }
-
+	let sphere = ri.scene.getObjectByName("sphere")
+	if (sphere.position.z > 3.5) {
+		resetGame()
+	}
 	//Oppdaterer grafikken:
 	updateThree(deltaTime);
 

@@ -8,12 +8,14 @@ import {
 } from "./myAmmoHelper.js";
 import {addMeshToScene} from "./myThreeHelper.js";
 import {createFlipperArm} from "./armHingeConstraint.js";
-import {createSphere} from "./sphere.js";
+import {createSphere, pushBall} from "./sphere.js";
 import {ri} from "./script.js";
 
 let wallHeight = 0.5;
 let floorSize = {width: 3.4, height: 0.1, depth: 7.5};
 let deviderWidth = 0.05;
+let point1 = (floorSize.width / 2) - (.05*4 + deviderWidth)
+let point2 = ((floorSize.width / 2) + (deviderWidth/2));
 /**
  * Oppretter hele spillet.
  * Merk størrelser; anta at en enhet er en meter, dvs. flipperSize = {with=1.1, ...} betyr at bredde på flipperen er
@@ -41,7 +43,7 @@ export function createPinballGame(textureObjects, angle) {
 	let point1 = (floorSize.width / 2) - (.05*4 + deviderWidth)
 	let point2 = ((floorSize.width / 2) + (deviderWidth/2));
 
-	addSpring(angle, {x:(point1 + point2)/2, y:0, z:(floorSize.depth/2) - (wallHeight/2)}); 
+	addSpring(angle, {x:(point1 + point2)/2, y:0, z: wallHeight}); 
 }
 
 function addSpring(angle, position) {
@@ -73,12 +75,29 @@ function addSpring(angle, position) {
 	let button = document.getElementById("btnShoot")
 
 	button.addEventListener("mousedown", () => {
-		ri.isShooting = true; 
+		if (!ri.hasShoot) {
+			ri.hasShoot = true
+			applyForceToSphere();
+		}
 	})
-	button.addEventListener("mouseup", () => {
-		ri.isShooting = false
-		applyForceToSphere();
+
+	let buttonNewgame = document.getElementById("btnNewGame")
+	buttonNewgame.addEventListener("mousedown", () => {
+		if (ri.hasShoot) {
+			resetGame()
+		}
 	})
+
+}
+
+export function resetGame() {
+	ri.hasShoot = false
+	const sphereMesh = ri.scene.getObjectByName("sphere");
+	ri.scene.remove(sphereMesh)
+	createSphere(.05, 0x0eFF09, {x:(point1 + point2)/2, y:.1, z:.2})
+
+	let points = document.getElementById("points")
+	points.innerText = "--"
 }
 
 function applyForceToSphere() {
@@ -86,11 +105,8 @@ function applyForceToSphere() {
     const sphereMesh = ri.scene.getObjectByName("sphere");
 	console.log(sphereMesh)
     if (sphereMesh) {
-        const sphereBody = sphereMesh.userData.physicsBody;
-
         // Apply force to the sphere in the direction of the spring's velocity
-        const force = new Ammo.btVector3(ri.springVelocity.x, ri.springVelocity.y, ri.springVelocity.z);
-        sphereBody.applyCentralImpulse(force);
+        pushBall(sphereMesh, ri.springVelocity)
     }
 }
 
@@ -216,9 +232,6 @@ export function createBoard(textureObject, floorTexture, envMap, position, angle
 	addWallsCollition(floorSize, wallHeight, position, compoundShape);
 
 	// MISC
-
-	let point1 = (floorSize.width / 2) - (.05*4 + deviderWidth)
-	let point2 = ((floorSize.width / 2) + (deviderWidth/2));
 
 	createSphere(.05, 0x0eFF09, {x:(point1 + point2)/2, y:.1, z:.2})
 	let rigidBody = createAmmoRigidBody(compoundShape, groupMesh, 0.2, 0.9, position, mass);

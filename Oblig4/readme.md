@@ -17,7 +17,7 @@ npm run build
 
 
 - [x] En utskyningsrampe for kula.
-- [x] Minst 5 rektangulære prismer som hindre. Disse fungerer kun som "ledere" av kula.
+- [?] Minst 5 rektangulære prismer som hindre. Disse fungerer kun som "ledere" av kula.
 - [x] Minst 5 bumpere. Disse skal være sylindre. Ved treff skal fargen endres.
 - [x] Toppen av spillet skal ha en glassplate slik at ikke kula ikke kan hoppe utefor spillet.   
 - [x] To typer bumperne: Sylindre og rektangulære prismer.
